@@ -1,0 +1,16 @@
+{
+	admin off
+}
+
+:80 {
+	reverse_proxy http://37.27.212.69 {
+		header_up Host {upstream_hostport}
+		header_up X-Real-IP {remote_host}
+
+		transport http {
+			dial_timeout 10s
+			response_header_timeout 0
+			read_buffer_size 4096
+		}
+	}
+}
