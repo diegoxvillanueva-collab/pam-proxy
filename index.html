@@ -305,6 +305,7 @@
 
   function connect() {
     var url=document.getElementById("wsUrl").value.trim();
+    var tok=document.getElementById("wsToken").value.trim();
     if(!url) { showConn("Ingresá la URL","err"); return; }
     if(ws) { ws.close(); ws=null; }
     authOk=false;
@@ -315,67 +316,56 @@
     ws = new WebSocket(url);
 
     ws.onopen = function() {
-      addFeed("Socket abierto. Esperando challenge del gateway...","system");
+      addFeed('Socket abierto. Esperando challenge del gateway...', 'system');
     };
 
-    ws.onmessage = function(e) {
-      var data;
-      try { data=JSON.parse(e.data); } catch(x) {
-        addFeed("Mensaje no-JSON: "+String(e.data).substring(0,80),"warn");
+    ws.onmessage = (ev) => {
+    try {
+      var data = JSON.parse(ev.data);
+
+      // Handle connect.challenge — respond with token
+      if (data.type === 'event' && data.event === 'connect.challenge') {
+        var response = JSON.stringify({
+          type: 'auth',
+          token: tok,
+          nonce: data.payload.nonce
+        });
+        ws.send(response);
+        addFeed('🔑 Challenge respondido — autenticando...', 'system');
         return;
       }
 
-      // Challenge: respond with connect request
-      if(data.type==="event" && data.event==="connect.challenge") {
-        var nonce=(data.payload&&data.payload.nonce)||"";
-        addFeed("← connect.challenge recibido","system");
-        doAuth(nonce);
+      // Handle auth success
+      if (data.type === 'event' && data.event === 'auth.ok') {
+        setConnected(true);
+        showConn('✅ Autenticado correctamente', 'ok');
+        addFeed('✅ Autenticado correctamente', 'success');
+        authOk = true;
         return;
       }
 
-      // Response to our connect request
-      if(data.type==="res") {
-        if(data.ok && !authOk) {
-          authOk=true;
-          setConnected(true);
-          showConn("✓ Autenticado correctamente","ok");
-          addFeed("✓ Auth OK — gateway conectado","success");
-        } else if(!data.ok) {
-          var errMsg=(data.error&&data.error.message)||"auth failed";
-          var errCode=(data.error&&data.error.code)||"";
-          addFeed("✗ Error: "+errCode+" — "+errMsg,"error");
-          showConn("✗ "+errMsg,"err");
-        }
+      // Handle connect res (protocol v3 auth confirmation)
+      if (data.type === 'res' && data.ok && !authOk) {
+        authOk = true;
+        setConnected(true);
+        showConn('✅ Autenticado correctamente', 'ok');
+        addFeed('✅ Auth OK — gateway conectado', 'success');
+        return;
+      }
+      if (data.type === 'res' && !data.ok) {
+        var errMsg = (data.error && data.error.message) || 'auth failed';
+        addFeed('✗ Error: ' + errMsg, 'error');
+        showConn('✗ ' + errMsg, 'err');
         return;
       }
 
-      // Regular gateway events
-      if(data.type==="event") {
-        msgCount++;
-        document.getElementById("msgCount").textContent=msgCount;
-        var evt=data.event||"unknown";
-        var pl=data.payload;
-        var preview=pl?JSON.stringify(pl).substring(0,100):"";
-        addFeed("← ["+evt+"] "+preview,"success");
-
-        // Handle chat stream
-        if(evt==="chat" && pl) {
-          var msg=null;
-          if(pl.state==="delta"||pl.state==="final") {
-            var m=pl.message;
-            if(m&&typeof m==="object"&&Array.isArray(m.content)) {
-              for(var i=0;i<m.content.length;i++) {
-                if(m.content[i].type==="text") { msg=m.content[i].text; break; }
-              }
-            } else if(m&&typeof m.text==="string") {
-              msg=m.text;
-            }
-          }
-          if(msg && pl.state==="final") appendChat("pam", msg);
-        }
-        return;
+      handleEvent(data);
+    } catch (_) {
+      if (ev.data && !ev.data.includes('ping')) {
+        addFeed(ev.data.substring(0, 120), 'system');
       }
-    };
+    }
+  };
 
     ws.onerror = function() {
       addFeed("Error WebSocket","error");
@@ -402,6 +392,30 @@
     else d.textContent=text;
     msgs.appendChild(d);
     msgs.scrollTop=msgs.scrollHeight;
+  }
+
+
+  function handleEvent(data) {
+    if(!data || data.type !== 'event') return;
+    msgCount++;
+    document.getElementById("msgCount").textContent = msgCount;
+    var evt = data.event || 'unknown';
+    var pl = data.payload;
+    var preview = pl ? JSON.stringify(pl).substring(0, 100) : '';
+    addFeed('← [' + evt + '] ' + preview, 'success');
+    // Chat stream
+    if (evt === 'chat' && pl && (pl.state === 'final' || pl.state === 'delta')) {
+      var m = pl.message;
+      var txt = null;
+      if (m && Array.isArray(m.content)) {
+        for (var i = 0; i < m.content.length; i++) {
+          if (m.content[i].type === 'text') { txt = m.content[i].text; break; }
+        }
+      } else if (m && typeof m.text === 'string') {
+        txt = m.text;
+      }
+      if (txt && pl.state === 'final') appendChat('pam', txt);
+    }
   }
 
   function sendMsg() {
