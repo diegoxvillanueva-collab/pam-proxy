@@ -1,15 +1,13 @@
 :{$PORT} {
-    reverse_proxy http://37.27.212.69:18789 {
-        header_up Host {host}
-        header_up X-Real-IP {remote}
-    }
+    root * /srv/static
+    file_server
+
     @websockets {
         header Connection *Upgrade*
         header Upgrade websocket
     }
     handle @websockets {
         reverse_proxy http://37.27.212.69:18789 {
-            header_up Host {host}
             header_up Upgrade {http.request.header.Upgrade}
             header_up Connection {http.request.header.Connection}
         }
