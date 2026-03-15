@@ -224,218 +224,202 @@
   </div>
 </div>
 <script>
-  var ws=null, msgCount=0, feedItems=0;
+  var ws = null, msgCount = 0, feedItems = 0, authOk = false;
 
+  /* ── helpers ── */
   function genId() {
     return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, function(c) {
       return (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c/4).toString(16);
     });
   }
-
   function ts() {
-    var d=new Date();
-    return d.getHours().toString().padStart(2,"0")+":"+d.getMinutes().toString().padStart(2,"0");
+    var d = new Date();
+    return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
   }
-
   function addFeed(msg, type) {
-    type = type||"system";
-    var feed=document.getElementById("feed"), item=document.createElement("div");
-    item.className="feed-item "+type;
-    item.innerHTML="<span class='feed-time'>"+ts()+"</span><span class='feed-msg'>"+msg+"</span>";
+    var feed = document.getElementById('feed'), item = document.createElement('div');
+    item.className = 'feed-item ' + (type||'system');
+    item.innerHTML = "<span class='feed-time'>" + ts() + "</span><span class='feed-msg'>" + msg + "</span>";
     feed.insertBefore(item, feed.firstChild);
-    if(feed.children.length>100) feed.removeChild(feed.lastChild);
+    if (feed.children.length > 100) feed.removeChild(feed.lastChild);
     feedItems++;
-    document.getElementById("feedCount").textContent=feedItems+" eventos";
+    document.getElementById('feedCount').textContent = feedItems + ' eventos';
   }
-
   function clearFeed() {
-    document.getElementById("feed").innerHTML="";
-    feedItems=0;
-    document.getElementById("feedCount").textContent="0 eventos";
+    document.getElementById('feed').innerHTML = '';
+    feedItems = 0;
+    document.getElementById('feedCount').textContent = '0 eventos';
   }
-
   function showConn(msg, type) {
-    var el=document.getElementById("connStatus");
-    el.style.display="block";
-    el.className="conn-status "+type;
-    el.textContent=msg;
+    var el = document.getElementById('connStatus');
+    el.style.display = 'block'; el.className = 'conn-status ' + type; el.textContent = msg;
   }
-
   function setConnected(yes) {
-    if(yes) {
-      document.getElementById("wsState").textContent="Conectado";
-      document.getElementById("wsState").style.background="rgba(46,204,113,0.15)";
-      document.getElementById("wsState").style.color="var(--green)";
-      document.getElementById("gsTxt").textContent="Conectado";
+    if (yes) {
+      document.getElementById('wsState').textContent = 'Conectado';
+      document.getElementById('wsState').style.background = 'rgba(46,204,113,0.15)';
+      document.getElementById('wsState').style.color = 'var(--green)';
+      document.getElementById('gsTxt').textContent = 'Conectado';
     } else {
-      document.getElementById("wsState").textContent="Desconectado";
-      document.getElementById("wsState").style.background="";
-      document.getElementById("wsState").style.color="";
-      document.getElementById("gsTxt").textContent="Desconectado";
+      document.getElementById('wsState').textContent = 'Desconectado';
+      document.getElementById('wsState').style.background = '';
+      document.getElementById('wsState').style.color = '';
+      document.getElementById('gsTxt').textContent = 'Desconectado';
     }
   }
+  function appendChat(who, text) {
+    var msgs = document.getElementById('chatMessages'), d = document.createElement('div');
+    d.className = 'msg ' + who;
+    if (who === 'pam') d.innerHTML = "<div class='sender'>PAM</div>" + String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+    else d.textContent = text;
+    msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight;
+  }
 
+  /* ── OpenClaw protocol helpers ── */
   function sendReq(method, params) {
-    if(!ws || ws.readyState!==1) return null;
-    var id=genId();
-    ws.send(JSON.stringify({type:"req", id:id, method:method, params:params}));
+    if (!ws || ws.readyState !== 1) return null;
+    var id = genId();
+    ws.send(JSON.stringify({ type: 'req', id: id, method: method, params: params }));
     return id;
   }
 
-  function doAuth(nonce) {
-    var token=document.getElementById("wsToken").value.trim();
-    addFeed("&#x2192; Respondiendo connect.challenge (nonce: "+nonce.substring(0,8)+"...)","system");
-    sendReq("connect", {
+  // Called after receiving connect.challenge — sends the proper connect req
+  function sendConnect(nonce, token) {
+    addFeed('\u2192 Respondiendo connect.challenge con req/connect...', 'system');
+    sendReq('connect', {
       minProtocol: 3,
       maxProtocol: 3,
       client: {
-        id: "openclaw-control-ui",
-        version: "control-ui",
-        platform: "web",
-        mode: "webchat",
+        id: 'openclaw-control-ui',
+        version: 'control-ui',
+        platform: 'web',
+        mode: 'webchat',
         instanceId: genId()
       },
-      role: "operator",
-      scopes: ["operator.admin","operator.approvals","operator.pairing"],
-      auth: { token: token, deviceToken: null, password: null }
+      role: 'operator',
+      scopes: ['operator.admin', 'operator.approvals', 'operator.pairing'],
+      caps: ['tool-events'],
+      auth: token ? { token: token, deviceToken: null, password: null } : null,
+      userAgent: navigator.userAgent,
+      locale: navigator.language
     });
   }
 
-  var authOk = false;
-
+  /* ── main connect ── */
   function connect() {
-    var url=document.getElementById("wsUrl").value.trim();
-    var tok=document.getElementById("wsToken").value.trim();
-    if(!url) { showConn("Ingresá la URL","err"); return; }
-    if(ws) { ws.close(); ws=null; }
-    authOk=false;
-    showConn("Conectando a "+url+"...","info");
-    addFeed("Intentando conexión a "+url,"system");
-    document.getElementById("wsState").textContent="Conectando...";
+    var url   = document.getElementById('wsUrl').value.trim();
+    var token = document.getElementById('wsToken').value.trim();
+    if (!url) { showConn('Ingres\u00e1 la URL', 'err'); return; }
+    if (ws) { ws.close(); ws = null; }
+    authOk = false;
+    showConn('Conectando a ' + url + '...', 'info');
+    addFeed('Intentando conexi\u00f3n a ' + url, 'system');
+    document.getElementById('wsState').textContent = 'Conectando...';
 
     ws = new WebSocket(url);
 
     ws.onopen = function() {
-      addFeed('Socket abierto. Esperando challenge del gateway...', 'system');
+      addFeed('Socket abierto \u2014 esperando challenge del gateway...', 'system');
     };
 
-    ws.onmessage = (ev) => {
-    try {
-      var data = JSON.parse(ev.data);
-
-      // Handle connect.challenge — respond with token
-      if (data.type === 'event' && data.event === 'connect.challenge') {
-        var response = JSON.stringify({
-          type: 'auth',
-          token: tok,
-          nonce: data.payload.nonce
-        });
-        ws.send(response);
-        addFeed('🔑 Challenge respondido — autenticando...', 'system');
+    ws.onmessage = function(ev) {
+      var data;
+      try { data = JSON.parse(ev.data); }
+      catch (_) {
+        if (ev.data && !ev.data.includes('ping'))
+          addFeed('No-JSON: ' + String(ev.data).substring(0, 80), 'warn');
         return;
       }
 
-      // Handle auth success
-      if (data.type === 'event' && data.event === 'auth.ok') {
-        setConnected(true);
-        showConn('✅ Autenticado correctamente', 'ok');
-        addFeed('✅ Autenticado correctamente', 'success');
-        authOk = true;
+      // ── Gateway event ──
+      if (data.type === 'event') {
+
+        // connect.challenge → respond with req/connect
+        if (data.event === 'connect.challenge') {
+          var nonce = (data.payload && data.payload.nonce) || '';
+          addFeed('\u2190 connect.challenge (nonce: ' + nonce.substring(0, 8) + '...)', 'system');
+          sendConnect(nonce, token);
+          return;
+        }
+
+        // connected / auth.ok (some versions)
+        if (data.event === 'auth.ok' || data.event === 'connected') {
+          if (!authOk) {
+            authOk = true; setConnected(true);
+            showConn('\u2705 Autenticado y conectado', 'ok');
+            addFeed('\u2705 Gateway conectado', 'success');
+          }
+          return;
+        }
+
+        // All other events
+        msgCount++; document.getElementById('msgCount').textContent = msgCount;
+        var preview = data.payload ? JSON.stringify(data.payload).substring(0, 100) : '';
+        addFeed('\u2190 [' + (data.event||'?') + '] ' + preview, 'success');
+
+        // Chat streaming
+        if (data.event === 'chat' && data.payload) {
+          var pl = data.payload;
+          if (pl.state === 'final' || pl.state === 'delta') {
+            var m = pl.message, txt = null;
+            if (m && Array.isArray(m.content)) {
+              for (var i = 0; i < m.content.length; i++)
+                if (m.content[i].type === 'text') { txt = m.content[i].text; break; }
+            } else if (m && typeof m.text === 'string') { txt = m.text; }
+            if (txt && pl.state === 'final') appendChat('pam', txt);
+          }
+        }
         return;
       }
 
-      // Handle connect res (protocol v3 auth confirmation)
-      if (data.type === 'res' && data.ok && !authOk) {
-        authOk = true;
-        setConnected(true);
-        showConn('✅ Autenticado correctamente', 'ok');
-        addFeed('✅ Auth OK — gateway conectado', 'success');
+      // ── Response to our req ──
+      if (data.type === 'res') {
+        if (data.ok && !authOk) {
+          authOk = true; setConnected(true);
+          showConn('\u2705 Autenticado correctamente', 'ok');
+          addFeed('\u2705 Connect OK \u2014 gateway listo', 'success');
+        } else if (!data.ok) {
+          var errCode = (data.error && data.error.code)    || '';
+          var errMsg  = (data.error && data.error.message) || 'error';
+          addFeed('\u2717 Error [' + errCode + ']: ' + errMsg, 'error');
+          showConn('\u2717 ' + errMsg, 'err');
+        }
         return;
       }
-      if (data.type === 'res' && !data.ok) {
-        var errMsg = (data.error && data.error.message) || 'auth failed';
-        addFeed('✗ Error: ' + errMsg, 'error');
-        showConn('✗ ' + errMsg, 'err');
-        return;
-      }
-
-      handleEvent(data);
-    } catch (_) {
-      if (ev.data && !ev.data.includes('ping')) {
-        addFeed(ev.data.substring(0, 120), 'system');
-      }
-    }
-  };
+    };
 
     ws.onerror = function() {
-      addFeed("Error WebSocket","error");
-      showConn("✗ Error al conectar. Verificá la URL.","err");
+      addFeed('Error WebSocket', 'error');
+      showConn('\u2717 Error al conectar. Verific\u00e1 la URL.', 'err');
     };
 
     ws.onclose = function(ev) {
-      setConnected(false);
-      authOk=false;
-      addFeed("WebSocket cerrado (código "+ev.code+(ev.reason?" — "+ev.reason:"")+")","warn");
-      ws=null;
+      setConnected(false); authOk = false;
+      addFeed('WebSocket cerrado (c\u00f3digo ' + ev.code + (ev.reason ? ' \u2014 ' + ev.reason : '') + ')', 'warn');
+      ws = null;
     };
   }
 
   function disconnect() {
-    if(ws) { ws.close(1000,"Manual"); ws=null; }
-    addFeed("Desconexión manual","warn");
+    if (ws) { ws.close(1000, 'Manual'); ws = null; }
+    addFeed('Desconexi\u00f3n manual', 'warn');
   }
 
-  function appendChat(who, text) {
-    var msgs=document.getElementById("chatMessages"), d=document.createElement("div");
-    d.className="msg "+who;
-    if(who==="pam") d.innerHTML="<div class='sender'>PAM</div>"+String(text).replace(/&/g,"&amp;").replace(/</g,"&lt;");
-    else d.textContent=text;
-    msgs.appendChild(d);
-    msgs.scrollTop=msgs.scrollHeight;
-  }
-
-
-  function handleEvent(data) {
-    if(!data || data.type !== 'event') return;
-    msgCount++;
-    document.getElementById("msgCount").textContent = msgCount;
-    var evt = data.event || 'unknown';
-    var pl = data.payload;
-    var preview = pl ? JSON.stringify(pl).substring(0, 100) : '';
-    addFeed('← [' + evt + '] ' + preview, 'success');
-    // Chat stream
-    if (evt === 'chat' && pl && (pl.state === 'final' || pl.state === 'delta')) {
-      var m = pl.message;
-      var txt = null;
-      if (m && Array.isArray(m.content)) {
-        for (var i = 0; i < m.content.length; i++) {
-          if (m.content[i].type === 'text') { txt = m.content[i].text; break; }
-        }
-      } else if (m && typeof m.text === 'string') {
-        txt = m.text;
-      }
-      if (txt && pl.state === 'final') appendChat('pam', txt);
-    }
-  }
-
+  /* ── chat ── */
   function sendMsg() {
-    var ta=document.getElementById("chatInput"), msg=ta.value.trim();
-    if(!msg) return;
-    appendChat("user", msg);
-    ta.value="";
-    addFeed("→ "+msg.substring(0,60),"system");
-    if(!authOk) {
-      setTimeout(function(){ appendChat("pam","No estoy autenticado en el gateway. Conectá primero."); }, 300);
+    var ta = document.getElementById('chatInput'), msg = ta.value.trim();
+    if (!msg) return;
+    appendChat('user', msg); ta.value = '';
+    addFeed('\u2192 ' + msg.substring(0, 60), 'system');
+    if (!authOk) {
+      setTimeout(function() { appendChat('pam', 'No estoy conectado al gateway. Conect\u00e1 primero.'); }, 300);
       return;
     }
-    sendReq("chat.send", {sessionKey:"main", message:msg, deliver:false, idempotencyKey:genId()});
+    sendReq('chat.send', { sessionKey: 'main', message: msg, deliver: false, idempotencyKey: genId() });
   }
+  function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } }
 
-  function handleKey(e) {
-    if(e.key==="Enter" && !e.shiftKey) { e.preventDefault(); sendMsg(); }
-  }
-
-  addFeed("PAM Dashboard cargado · "+new Date().toLocaleDateString("es-AR"),"system");
+  addFeed('PAM Dashboard cargado \u00b7 ' + new Date().toLocaleDateString('es-AR'), 'system');
 </script>
 </body>
 </html>
