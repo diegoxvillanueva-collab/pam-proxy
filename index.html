@@ -299,7 +299,7 @@
       role: 'operator',
       scopes: ['operator.admin', 'operator.approvals', 'operator.pairing'],
       caps: ['tool-events'],
-      auth: token ? { token: token, deviceToken: null, password: null } : null,
+      auth: { token: token || null, deviceToken: null, password: null },
       userAgent: navigator.userAgent,
       locale: navigator.language
     });
