@@ -224,62 +224,203 @@
   </div>
 </div>
 <script>
-  var ws=null,msgCount=0,feedItems=0;
-  function ts(){var d=new Date();return d.getHours().toString().padStart(2,"0")+":"+d.getMinutes().toString().padStart(2,"0");}
-  function addFeed(msg,type){
-    var feed=document.getElementById("feed"),item=document.createElement("div");
-    item.className="feed-item "+(type||"system");
+  var ws=null, msgCount=0, feedItems=0;
+
+  function genId() {
+    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, function(c) {
+      return (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c/4).toString(16);
+    });
+  }
+
+  function ts() {
+    var d=new Date();
+    return d.getHours().toString().padStart(2,"0")+":"+d.getMinutes().toString().padStart(2,"0");
+  }
+
+  function addFeed(msg, type) {
+    type = type||"system";
+    var feed=document.getElementById("feed"), item=document.createElement("div");
+    item.className="feed-item "+type;
     item.innerHTML="<span class='feed-time'>"+ts()+"</span><span class='feed-msg'>"+msg+"</span>";
-    feed.insertBefore(item,feed.firstChild);
-    if(feed.children.length>100)feed.removeChild(feed.lastChild);
-    feedItems++;document.getElementById("feedCount").textContent=feedItems+" eventos";
+    feed.insertBefore(item, feed.firstChild);
+    if(feed.children.length>100) feed.removeChild(feed.lastChild);
+    feedItems++;
+    document.getElementById("feedCount").textContent=feedItems+" eventos";
   }
-  function clearFeed(){document.getElementById("feed").innerHTML="";feedItems=0;document.getElementById("feedCount").textContent="0 eventos";}
-  function showConn(msg,type){var el=document.getElementById("connStatus");el.style.display="block";el.className="conn-status "+type;el.textContent=msg;}
-  function connect(){
-    var url=document.getElementById("wsUrl").value.trim(),token=document.getElementById("wsToken").value.trim();
-    if(!url){showConn("Ingresá la URL","err");return;}
-    if(ws){ws.close();ws=null;}
-    var fullUrl=token?url+(url.includes("?")?"&":"?")+"token="+encodeURIComponent(token):url;
-    showConn("Conectando...","info");addFeed("Intentando conexión a "+url,"system");
-    document.getElementById("wsState").textContent="Conectando...";
-    ws=new WebSocket(fullUrl);
-    ws.onopen=function(){
+
+  function clearFeed() {
+    document.getElementById("feed").innerHTML="";
+    feedItems=0;
+    document.getElementById("feedCount").textContent="0 eventos";
+  }
+
+  function showConn(msg, type) {
+    var el=document.getElementById("connStatus");
+    el.style.display="block";
+    el.className="conn-status "+type;
+    el.textContent=msg;
+  }
+
+  function setConnected(yes) {
+    if(yes) {
       document.getElementById("wsState").textContent="Conectado";
-      document.getElementById("wsState").style.cssText="background:rgba(46,204,113,0.15);color:var(--green)";
+      document.getElementById("wsState").style.background="rgba(46,204,113,0.15)";
+      document.getElementById("wsState").style.color="var(--green)";
       document.getElementById("gsTxt").textContent="Conectado";
-      showConn("✓ Conexión establecida","ok");addFeed("WebSocket conectado","success");
-    };
-    ws.onmessage=function(e){
-      msgCount++;document.getElementById("msgCount").textContent=msgCount;
-      var data;try{data=JSON.parse(e.data);}catch(x){data={text:e.data};}
-      var text=data.text||data.message||data.content||JSON.stringify(data);
-      addFeed("← "+text.substring(0,120),"success");
-      if(data.text||data.message||data.content)appendChat("pam",text);
-    };
-    ws.onerror=function(){addFeed("Error WebSocket","error");showConn("✗ Error al conectar","err");};
-    ws.onclose=function(e){
+    } else {
       document.getElementById("wsState").textContent="Desconectado";
-      document.getElementById("wsState").style.cssText="";
+      document.getElementById("wsState").style.background="";
+      document.getElementById("wsState").style.color="";
       document.getElementById("gsTxt").textContent="Desconectado";
-      addFeed("WebSocket cerrado ("+e.code+")","warn");ws=null;
+    }
+  }
+
+  function sendReq(method, params) {
+    if(!ws || ws.readyState!==1) return null;
+    var id=genId();
+    ws.send(JSON.stringify({type:"req", id:id, method:method, params:params}));
+    return id;
+  }
+
+  function doAuth(nonce) {
+    var token=document.getElementById("wsToken").value.trim();
+    addFeed("&#x2192; Respondiendo connect.challenge (nonce: "+nonce.substring(0,8)+"...)","system");
+    sendReq("connect", {
+      minProtocol: 3,
+      maxProtocol: 3,
+      client: {
+        id: "openclaw-control-ui",
+        version: "control-ui",
+        platform: "web",
+        mode: "webchat",
+        instanceId: genId()
+      },
+      role: "operator",
+      scopes: ["operator.admin","operator.approvals","operator.pairing"],
+      auth: { token: token, deviceToken: null, password: null }
+    });
+  }
+
+  var authOk = false;
+
+  function connect() {
+    var url=document.getElementById("wsUrl").value.trim();
+    if(!url) { showConn("Ingresá la URL","err"); return; }
+    if(ws) { ws.close(); ws=null; }
+    authOk=false;
+    showConn("Conectando a "+url+"...","info");
+    addFeed("Intentando conexión a "+url,"system");
+    document.getElementById("wsState").textContent="Conectando...";
+
+    ws = new WebSocket(url);
+
+    ws.onopen = function() {
+      addFeed("Socket abierto. Esperando challenge del gateway...","system");
+    };
+
+    ws.onmessage = function(e) {
+      var data;
+      try { data=JSON.parse(e.data); } catch(x) {
+        addFeed("Mensaje no-JSON: "+String(e.data).substring(0,80),"warn");
+        return;
+      }
+
+      // Challenge: respond with connect request
+      if(data.type==="event" && data.event==="connect.challenge") {
+        var nonce=(data.payload&&data.payload.nonce)||"";
+        addFeed("← connect.challenge recibido","system");
+        doAuth(nonce);
+        return;
+      }
+
+      // Response to our connect request
+      if(data.type==="res") {
+        if(data.ok && !authOk) {
+          authOk=true;
+          setConnected(true);
+          showConn("✓ Autenticado correctamente","ok");
+          addFeed("✓ Auth OK — gateway conectado","success");
+        } else if(!data.ok) {
+          var errMsg=(data.error&&data.error.message)||"auth failed";
+          var errCode=(data.error&&data.error.code)||"";
+          addFeed("✗ Error: "+errCode+" — "+errMsg,"error");
+          showConn("✗ "+errMsg,"err");
+        }
+        return;
+      }
+
+      // Regular gateway events
+      if(data.type==="event") {
+        msgCount++;
+        document.getElementById("msgCount").textContent=msgCount;
+        var evt=data.event||"unknown";
+        var pl=data.payload;
+        var preview=pl?JSON.stringify(pl).substring(0,100):"";
+        addFeed("← ["+evt+"] "+preview,"success");
+
+        // Handle chat stream
+        if(evt==="chat" && pl) {
+          var msg=null;
+          if(pl.state==="delta"||pl.state==="final") {
+            var m=pl.message;
+            if(m&&typeof m==="object"&&Array.isArray(m.content)) {
+              for(var i=0;i<m.content.length;i++) {
+                if(m.content[i].type==="text") { msg=m.content[i].text; break; }
+              }
+            } else if(m&&typeof m.text==="string") {
+              msg=m.text;
+            }
+          }
+          if(msg && pl.state==="final") appendChat("pam", msg);
+        }
+        return;
+      }
+    };
+
+    ws.onerror = function() {
+      addFeed("Error WebSocket","error");
+      showConn("✗ Error al conectar. Verificá la URL.","err");
+    };
+
+    ws.onclose = function(ev) {
+      setConnected(false);
+      authOk=false;
+      addFeed("WebSocket cerrado (código "+ev.code+(ev.reason?" — "+ev.reason:"")+")","warn");
+      ws=null;
     };
   }
-  function disconnect(){if(ws){ws.close(1000);ws=null;}addFeed("Desconexión manual","warn");}
-  function appendChat(who,text){
-    var msgs=document.getElementById("chatMessages"),d=document.createElement("div");
+
+  function disconnect() {
+    if(ws) { ws.close(1000,"Manual"); ws=null; }
+    addFeed("Desconexión manual","warn");
+  }
+
+  function appendChat(who, text) {
+    var msgs=document.getElementById("chatMessages"), d=document.createElement("div");
     d.className="msg "+who;
-    if(who==="pam")d.innerHTML="<div class='sender'>PAM</div>"+text.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+    if(who==="pam") d.innerHTML="<div class='sender'>PAM</div>"+String(text).replace(/&/g,"&amp;").replace(/</g,"&lt;");
     else d.textContent=text;
-    msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+    msgs.appendChild(d);
+    msgs.scrollTop=msgs.scrollHeight;
   }
-  function sendMsg(){
-    var ta=document.getElementById("chatInput"),msg=ta.value.trim();
-    if(!msg)return;appendChat("user",msg);ta.value="";addFeed("→ "+msg.substring(0,60),"system");
-    if(ws&&ws.readyState===1){ws.send(JSON.stringify({type:"message",text:msg}));}
-    else{setTimeout(function(){appendChat("pam","No estoy conectado al gateway. Conectá primero.");},400);}
+
+  function sendMsg() {
+    var ta=document.getElementById("chatInput"), msg=ta.value.trim();
+    if(!msg) return;
+    appendChat("user", msg);
+    ta.value="";
+    addFeed("→ "+msg.substring(0,60),"system");
+    if(!authOk) {
+      setTimeout(function(){ appendChat("pam","No estoy autenticado en el gateway. Conectá primero."); }, 300);
+      return;
+    }
+    sendReq("chat.send", {sessionKey:"main", message:msg, deliver:false, idempotencyKey:genId()});
   }
-  function handleKey(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMsg();}}
+
+  function handleKey(e) {
+    if(e.key==="Enter" && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+  }
+
   addFeed("PAM Dashboard cargado · "+new Date().toLocaleDateString("es-AR"),"system");
 </script>
 </body>
