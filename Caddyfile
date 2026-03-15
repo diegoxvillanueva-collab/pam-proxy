@@ -1,16 +1,18 @@
-{
-	admin off
-}
-
-:80 {
+:{$PORT} {
 	reverse_proxy http://37.27.212.69 {
-		header_up Host {upstream_hostport}
-		header_up X-Real-IP {remote_host}
+		header_up Host {host}
+		header_up X-Real-IP {remote}
+	}
 
-		transport http {
-			dial_timeout 10s
-			response_header_timeout 0
-			read_buffer_size 4096
+	@websockets {
+		header Connection *Upgrade*
+		header Upgrade websocket
+	}
+	handle @websockets {
+		reverse_proxy http://37.27.212.69 {
+			header_up Host {host}
+			header_up Upgrade {http.request.header.Upgrade}
+			header_up Connection {http.request.header.Connection}
 		}
 	}
 }
