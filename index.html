@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAM — Centro de Operaciones</title>
+<style>
+  :root {
+    --bg: #0d0f14; --surface: #161920; --surface2: #1e2230; --border: #2a2f3d;
+    --accent: #4f8ef7; --accent2: #7c5cbf; --green: #2ecc71; --yellow: #f1c40f;
+    --red: #e74c3c; --text: #e8eaf0; --muted: #6b7280; --font: "Inter", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 28px; border-bottom: 1px solid var(--border); background: var(--surface);
+  }
+  header .logo { display: flex; align-items: center; gap: 12px; }
+  header .logo-icon {
+    width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 800; color: white;
+  }
+  header h1 { font-size: 18px; font-weight: 700; }
+  header .subtitle { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .status-badge {
+    display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 600; background: rgba(46,204,113,0.12); color: var(--green);
+    border: 1px solid rgba(46,204,113,0.25);
+  }
+  .status-badge .dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .main { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; padding: 20px 24px; max-width: 1400px; margin: 0 auto; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+  .card-badge { font-size: 11px; padding: 3px 8px; border-radius: 8px; font-weight: 600; }
+  .badge-green { background: rgba(46,204,113,0.15); color: var(--green); }
+  .badge-yellow { background: rgba(241,196,15,0.15); color: var(--yellow); }
+  .badge-blue { background: rgba(79,142,247,0.15); color: var(--accent); }
+  .conn-panel { grid-column: 1 / -1; }
+  .conn-form { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 11px; color: var(--muted); font-weight: 500; }
+  .field input {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 8px 12px; border-radius: 8px; font-size: 13px; width: 260px; outline: none;
+  }
+  .field input.token-field { width: 340px; }
+  .btn { padding: 9px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-danger { background: rgba(231,76,60,0.15); color: var(--red); border: 1px solid rgba(231,76,60,0.3); }
+  .conn-status { margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 12px; }
+  .conn-status.ok { background: rgba(46,204,113,0.1); color: var(--green); border: 1px solid rgba(46,204,113,0.2); }
+  .conn-status.err { background: rgba(231,76,60,0.1); color: var(--red); border: 1px solid rgba(231,76,60,0.2); }
+  .conn-status.info { background: rgba(79,142,247,0.1); color: var(--accent); border: 1px solid rgba(79,142,247,0.2); }
+  .activity { grid-column: 1 / 3; }
+  #feed { max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+  .feed-item { display: flex; gap: 10px; padding: 10px 12px; background: var(--surface2); border-radius: 8px; border-left: 3px solid transparent; font-size: 12px; }
+  .feed-item.system { border-left-color: var(--accent); }
+  .feed-item.error { border-left-color: var(--red); }
+  .feed-item.success { border-left-color: var(--green); }
+  .feed-item.warn { border-left-color: var(--yellow); }
+  .feed-time { color: var(--muted); min-width: 50px; font-family: monospace; }
+  .feed-msg { color: var(--text); flex: 1; }
+  .chat-panel { grid-column: 3; grid-row: 2 / 4; display: flex; flex-direction: column; }
+  .chat-messages { flex: 1; max-height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+  .msg { padding: 10px 13px; border-radius: 10px; font-size: 13px; line-height: 1.5; max-width: 90%; }
+  .msg.user { background: var(--accent); color: white; align-self: flex-end; }
+  .msg.pam { background: var(--surface2); color: var(--text); align-self: flex-start; }
+  .msg.pam .sender { font-size: 10px; color: var(--accent); font-weight: 700; margin-bottom: 4px; }
+  .chat-input-wrap { display: flex; gap: 8px; }
+  .chat-input-wrap textarea {
+    flex: 1; background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 10px 12px; border-radius: 8px; font-size: 13px; resize: none; height: 64px; outline: none; font-family: var(--font);
+  }
+  .btn-send { width: 48px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; }
+  .agents-panel { grid-column: 1 / 3; }
+  .agents-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .agent-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 6px; }
+  .agent-card .name { font-size: 13px; font-weight: 700; }
+  .agent-card .role { font-size: 11px; color: var(--muted); }
+  .agent-card .status-row { display: flex; align-items: center; gap: 5px; font-size: 11px; margin-top: 4px; }
+  .dot-sm { width: 6px; height: 6px; border-radius: 50%; }
+  .dot-green { background: var(--green); } .dot-yellow { background: var(--yellow); } .dot-gray { background: var(--muted); }
+  .sys-rows { display: flex; flex-direction: column; gap: 8px; }
+  .sys-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--surface2); border-radius: 8px; font-size: 12px; }
+  .sys-row .label { color: var(--muted); }
+  .sys-row .val { font-weight: 600; font-family: monospace; }
+  .sys-row .val.ok { color: var(--green); } .sys-row .val.warn { color: var(--yellow); }
+  .hb-rows { display: flex; flex-direction: column; gap: 8px; }
+  .hb-row { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; background: var(--surface2); border-radius: 8px; font-size: 12px; }
+  .hb-icon { font-size: 18px; }
+  .hb-info .hb-name { font-weight: 600; font-size: 13px; }
+  .hb-info .hb-time { color: var(--accent); font-family: monospace; font-size: 11px; margin-top: 2px; }
+  .hb-info .hb-desc { color: var(--muted); margin-top: 3px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <div class="logo-icon">P</div>
+    <div>
+      <h1>PAM — Centro de Operaciones</h1>
+      <div class="subtitle">Ágora Consultores · Sistema Multi-Agente</div>
+    </div>
+  </div>
+  <div id="globalStatus" class="status-badge">
+    <div class="dot"></div>
+    <span id="gsTxt">Desconectado</span>
+  </div>
+</header>
+<div class="main">
+  <div class="card conn-panel">
+    <div class="card-header">
+      <span class="card-title">Conexión al Gateway</span>
+      <span class="card-badge badge-blue" id="wsState">Desconectado</span>
+    </div>
+    <div class="conn-form">
+      <div class="field">
+        <label>WebSocket URL</label>
+        <input type="text" id="wsUrl" value="ws://37.27.212.69:18789" />
+      </div>
+      <div class="field">
+        <label>Token de Autenticación</label>
+        <input type="text" id="wsToken" class="token-field" placeholder="67276f1c466b237458534b5a..." />
+      </div>
+      <button class="btn btn-primary" onclick="connect()">Conectar</button>
+      <button class="btn btn-danger" onclick="disconnect()">Desconectar</button>
+    </div>
+    <div id="connStatus" class="conn-status info" style="display:none"></div>
+  </div>
+  <div class="card activity">
+    <div class="card-header">
+      <span class="card-title">Feed de Actividad</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="card-badge badge-green" id="feedCount">0 eventos</span>
+        <button class="btn btn-danger" style="padding:4px 10px;font-size:11px" onclick="clearFeed()">Limpiar</button>
+      </div>
+    </div>
+    <div id="feed">
+      <div class="feed-item system">
+        <span class="feed-time">--:--</span>
+        <span class="feed-msg">Dashboard iniciado. Conectá el gateway para comenzar.</span>
+      </div>
+    </div>
+  </div>
+  <div class="card chat-panel">
+    <div class="card-header">
+      <span class="card-title">Chat con PAM</span>
+      <span class="card-badge badge-green">Listo</span>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="msg pam">
+        <div class="sender">PAM</div>
+        Buenos días, Diego. Conectá el gateway y empezamos.
+      </div>
+    </div>
+    <div class="chat-input-wrap">
+      <textarea id="chatInput" placeholder="Escribí un mensaje para PAM..." onkeydown="handleKey(event)"></textarea>
+      <button class="btn-send" onclick="sendMsg()">↑</button>
+    </div>
+  </div>
+  <div class="card agents-panel">
+    <div class="card-header">
+      <span class="card-title">Agentes del Sistema</span>
+      <span class="card-badge badge-yellow">6 agentes</span>
+    </div>
+    <div class="agents-grid">
+      <div class="agent-card">
+        <div class="name">PAM Asistente</div><div class="role">Core · Asistente Personal</div>
+        <div class="status-row"><div class="dot-sm dot-green"></div><span style="color:var(--green)">Activo</span></div>
+      </div>
+      <div class="agent-card">
+        <div class="name">PAM Cuanti</div><div class="role">Ponderación de muestras</div>
+        <div class="status-row"><div class="dot-sm dot-yellow"></div><span style="color:var(--yellow)">En integración</span></div>
+      </div>
+      <div class="agent-card">
+        <div class="name">OAK</div><div class="role">Análisis cualitativo</div>
+        <div class="status-row"><div class="dot-sm dot-yellow"></div><span style="color:var(--yellow)">En integración</span></div>
+      </div>
+      <div class="agent-card">
+        <div class="name">Graficador</div><div class="role">Pre-informe PPTX automático</div>
+        <div class="status-row"><div class="dot-sm dot-yellow"></div><span style="color:var(--yellow)">En integración</span></div>
+      </div>
+      <div class="agent-card">
+        <div class="name">Corrector</div><div class="role">Auditoría de informes</div>
+        <div class="status-row"><div class="dot-sm dot-yellow"></div><span style="color:var(--yellow)">En integración</span></div>
+      </div>
+      <div class="agent-card">
+        <div class="name">Agente Operador</div><div class="role">Automatización de tareas</div>
+        <div class="status-row"><div class="dot-sm dot-gray"></div><span style="color:var(--muted)">En diseño</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Estado del Sistema</span><span class="card-badge badge-green">Online</span></div>
+    <div class="sys-rows">
+      <div class="sys-row"><span class="label">Gateway WebSocket</span><span class="val ok">37.27.212.69:18789</span></div>
+      <div class="sys-row"><span class="label">Telegram Bot</span><span class="val ok">@pamoficina_bot</span></div>
+      <div class="sys-row"><span class="label">Gmail</span><span class="val warn">Pendiente OAuth</span></div>
+      <div class="sys-row"><span class="label">Google Calendar</span><span class="val warn">Pendiente skill</span></div>
+      <div class="sys-row"><span class="label">Servidor</span><span class="val ok">Hetzner · 37.27.212.69</span></div>
+      <div class="sys-row"><span class="label">Mensajes recibidos</span><span class="val" id="msgCount">0</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Rutinas Automáticas</span><span class="card-badge badge-blue">Lun–Vie</span></div>
+    <div class="hb-rows">
+      <div class="hb-row">
+        <div class="hb-icon">🌅</div>
+        <div class="hb-info"><div class="hb-name">Arranque del día</div><div class="hb-time">08:00</div><div class="hb-desc">Resumen de emails, calendario y pendientes</div></div>
+      </div>
+      <div class="hb-row">
+        <div class="hb-icon">☀️</div>
+        <div class="hb-info"><div class="hb-name">Check de mediodía</div><div class="hb-time">13:00</div><div class="hb-desc">Estado de proyectos activos y novedades</div></div>
+      </div>
+      <div class="hb-row">
+        <div class="hb-icon">🌙</div>
+        <div class="hb-info"><div class="hb-name">Cierre de jornada</div><div class="hb-time">17:30</div><div class="hb-desc">Resumen del día y tareas para mañana</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  var ws=null,msgCount=0,feedItems=0;
+  function ts(){var d=new Date();return d.getHours().toString().padStart(2,"0")+":"+d.getMinutes().toString().padStart(2,"0");}
+  function addFeed(msg,type){
+    var feed=document.getElementById("feed"),item=document.createElement("div");
+    item.className="feed-item "+(type||"system");
+    item.innerHTML="<span class='feed-time'>"+ts()+"</span><span class='feed-msg'>"+msg+"</span>";
+    feed.insertBefore(item,feed.firstChild);
+    if(feed.children.length>100)feed.removeChild(feed.lastChild);
+    feedItems++;document.getElementById("feedCount").textContent=feedItems+" eventos";
+  }
+  function clearFeed(){document.getElementById("feed").innerHTML="";feedItems=0;document.getElementById("feedCount").textContent="0 eventos";}
+  function showConn(msg,type){var el=document.getElementById("connStatus");el.style.display="block";el.className="conn-status "+type;el.textContent=msg;}
+  function connect(){
+    var url=document.getElementById("wsUrl").value.trim(),token=document.getElementById("wsToken").value.trim();
+    if(!url){showConn("Ingresá la URL","err");return;}
+    if(ws){ws.close();ws=null;}
+    var fullUrl=token?url+(url.includes("?")?"&":"?")+"token="+encodeURIComponent(token):url;
+    showConn("Conectando...","info");addFeed("Intentando conexión a "+url,"system");
+    document.getElementById("wsState").textContent="Conectando...";
+    ws=new WebSocket(fullUrl);
+    ws.onopen=function(){
+      document.getElementById("wsState").textContent="Conectado";
+      document.getElementById("wsState").style.cssText="background:rgba(46,204,113,0.15);color:var(--green)";
+      document.getElementById("gsTxt").textContent="Conectado";
+      showConn("✓ Conexión establecida","ok");addFeed("WebSocket conectado","success");
+    };
+    ws.onmessage=function(e){
+      msgCount++;document.getElementById("msgCount").textContent=msgCount;
+      var data;try{data=JSON.parse(e.data);}catch(x){data={text:e.data};}
+      var text=data.text||data.message||data.content||JSON.stringify(data);
+      addFeed("← "+text.substring(0,120),"success");
+      if(data.text||data.message||data.content)appendChat("pam",text);
+    };
+    ws.onerror=function(){addFeed("Error WebSocket","error");showConn("✗ Error al conectar","err");};
+    ws.onclose=function(e){
+      document.getElementById("wsState").textContent="Desconectado";
+      document.getElementById("wsState").style.cssText="";
+      document.getElementById("gsTxt").textContent="Desconectado";
+      addFeed("WebSocket cerrado ("+e.code+")","warn");ws=null;
+    };
+  }
+  function disconnect(){if(ws){ws.close(1000);ws=null;}addFeed("Desconexión manual","warn");}
+  function appendChat(who,text){
+    var msgs=document.getElementById("chatMessages"),d=document.createElement("div");
+    d.className="msg "+who;
+    if(who==="pam")d.innerHTML="<div class='sender'>PAM</div>"+text.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+    else d.textContent=text;
+    msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+  }
+  function sendMsg(){
+    var ta=document.getElementById("chatInput"),msg=ta.value.trim();
+    if(!msg)return;appendChat("user",msg);ta.value="";addFeed("→ "+msg.substring(0,60),"system");
+    if(ws&&ws.readyState===1){ws.send(JSON.stringify({type:"message",text:msg}));}
+    else{setTimeout(function(){appendChat("pam","No estoy conectado al gateway. Conectá primero.");},400);}
+  }
+  function handleKey(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMsg();}}
+  addFeed("PAM Dashboard cargado · "+new Date().toLocaleDateString("es-AR"),"system");
+</script>
+</body>
+</html>
