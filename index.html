@@ -459,7 +459,7 @@ function doConnect(){
       if(d.type==='event'&&d.event==='connect.challenge'){
         addFeed('s','→ Respondiendo connect.challenge con req/connect...');
         const id=crypto.randomUUID?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&0x3|0x8)).toString(16)});
-        ws.send(JSON.stringify({type:'req',id,method:'connect',params:{minProtocol:3,maxProtocol:3,client:{id:'openclaw-control-ui',name:'PAM Dashboard',version:'1.0.0'},role:'operator',scopes:['operator.admin','operator.read','operator.write'],auth:{token:tok||'',deviceToken:'',password:''}}}));
+        ws.send(JSON.stringify({type:'req',id,method:'connect',params:{minProtocol:3,maxProtocol:3,nonce:(d.payload&&d.payload.nonce)||'',client:{id:'openclaw-control-ui',name:'PAM Dashboard',version:'1.0.0'},role:'operator',scopes:['operator.admin','operator.read','operator.write'],auth:{token:tok||'',deviceToken:'',password:''}}}));
         return;
       }
       if((d.type==='res'&&d.result?.ok)||(d.type==='event'&&d.event==='auth.ok')){
