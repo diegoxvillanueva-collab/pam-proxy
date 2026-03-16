@@ -197,7 +197,7 @@ textarea.form-in{resize:vertical;min-height:60px}
 <!-- TABS -->
 <div class="tabs">
   <div class="tab active" onclick="switchTab('sistema')">🖥 Sistema</div>
-  <div class="tab" onclick="switchTab('proyectos')">📋 Proyectos</div>
+  <div class="tab" onclick="switchTab('proyectos')"> Proyectos</div>
   <div class="tab" onclick="switchTab('chat')">💬 Chat PAM</div>
 </div>
 
@@ -231,7 +231,7 @@ textarea.form-in{resize:vertical;min-height:60px}
       <div class="afoot">Msgs hoy: <b id="pamMsgs">0</b></div>
     </div>
     <div class="acard dim"><div class="abar"></div>
-      <div class="ahead"><div class="aicon">📋</div><div class="apill"><div class="pdot"></div><span class="plbl">Offline</span></div></div>
+      <div class="ahead"><div class="aicon"></div><div class="apill"><div class="pdot"></div><span class="plbl">Offline</span></div></div>
       <div class="aname">Operador</div><div class="arole">Gestión de proyectos</div>
       <div class="aact">Sin configurar</div><div class="soon">Próximamente</div>
     </div>
@@ -290,10 +290,10 @@ textarea.form-in{resize:vertical;min-height:60px}
 <!-- ═══════════════════════════════ PROYECTOS ═══════════════════════════════ -->
 <div class="view" id="view-proyectos">
   <div class="proy-toolbar">
-    <span class="proy-title">📋 Tablero de Proyectos — Ágora</span>
+    <span class="proy-title"> Tablero de Proyectos — Ágora</span>
     <button class="filter-btn active" onclick="setFilter('all',this)">Todos</button>
-    <button class="filter-btn" onclick="setFilter('argentina',this)">🇦🇷 Argentina</button>
-    <button class="filter-btn" onclick="setFilter('latam',this)">🌎 LATAM</button>
+    <button class="filter-btn" onclick="setFilter('argentina',this)">AR Argentina</button>
+    <button class="filter-btn" onclick="setFilter('latam',this)">LATAM</button>
     <button class="filter-btn" onclick="setFilter('urgent',this)">🔥 Urgentes</button>
     <button class="btn btn-pri btn-sm" onclick="openModal(null,null)">+ Nuevo proyecto</button>
     <button class="btn btn-sec btn-sm" onclick="syncProyectos()">↻ Sincronizar</button>
@@ -325,7 +325,7 @@ textarea.form-in{resize:vertical;min-height:60px}
           <button class="btn btn-sec btn-sm" style="text-align:left" onclick="quickCmd('Listá todos los proyectos urgentes ahora mismo')">🔥 Proyectos urgentes</button>
           <button class="btn btn-sec btn-sm" style="text-align:left" onclick="quickCmd('¿Qué tengo pendiente hacer hoy?')">✅ Pendientes de hoy</button>
           <button class="btn btn-sec btn-sm" style="text-align:left" onclick="quickCmd('Listá los eventos de Google Calendar de hoy')">📅 Agenda de hoy</button>
-          <button class="btn btn-sec btn-sm" style="text-align:left" onclick="quickCmd('Dame un resumen del estado general de todos los proyectos')">📋 Resumen general</button>
+          <button class="btn btn-sec btn-sm" style="text-align:left" onclick="quickCmd('Dame un resumen del estado general de todos los proyectos')"> Resumen general</button>
         </div>
       </div>
       <div class="panel">
@@ -355,7 +355,7 @@ textarea.form-in{resize:vertical;min-height:60px}
       <div class="form-row" style="margin:0">
         <label class="form-lbl">Región</label>
         <select class="form-in sel" id="fRegion">
-          <option value="argentina">🇦🇷 Argentina</option>
+          <option value="argentina">AR Argentina</option>
           <option value="latam">🌎 LATAM / Internacional</option>
         </select>
       </div>
@@ -665,7 +665,7 @@ function makeCard(p){
   if(p.urgent)el.style.borderColor='#7f2d2d';
   el.innerHTML=`
     <div class="kcard-top">
-      <span class="kcard-flag">${p.flag||'🌐'}</span>
+      <span class="kcard-flag">${p.flag||'--'}</span>
       <span class="kcard-name">${esc(p.name)}</span>
       ${p.urgent?'<span class="kcard-urgent">🔥</span>':''}
     </div>
@@ -749,7 +749,7 @@ async function saveProject(){
     p.urgent=document.getElementById('fUrgente').checked;
   }else{
     const id=nombre.toLowerCase().replace(/[^a-z0-9]/g,'_').substring(0,30)+'_'+Date.now();
-    proyData.projects.push({id,name:nombre,region:document.getElementById('fRegion').value,flag:document.getElementById('fRegion').value==='argentina'?'🇦🇷':'🌎',stage:document.getElementById('fEtapa').value,urgent:document.getElementById('fUrgente').checked,responsible:document.getElementById('fResp').value.trim(),nextAction:document.getElementById('fAccion').value.trim(),notes:document.getElementById('fNotas').value.trim()});
+    proyData.projects.push({id,name:nombre,region:document.getElementById('fRegion').value,flag:document.getElementById('fRegion').value==='argentina'?'AR':'LATAM',stage:document.getElementById('fEtapa').value,urgent:document.getElementById('fUrgente').checked,responsible:document.getElementById('fResp').value.trim(),nextAction:document.getElementById('fAccion').value.trim(),notes:document.getElementById('fNotas').value.trim()});
   }
   closeModal();
   renderKanban();
