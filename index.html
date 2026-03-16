@@ -462,7 +462,7 @@ function doConnect(){
         ws.send(JSON.stringify({type:'req',id,method:'connect',params:{minProtocol:3,maxProtocol:3,client:{id:'openclaw-control-ui',displayName:'PAM Dashboard',version:'1.0.0',platform:'web',mode:'ui'},role:'operator',scopes:['operator.admin','operator.read','operator.write'],auth:{token:tok||'',deviceToken:'',password:''}}}));
         return;
       }
-      if((d.type==='res'&&d.result?.ok)||(d.type==='event'&&d.event==='auth.ok')){
+      if((d.type==='res'&&(d.result?.ok||d.ok===true))||(d.type==='event'&&(d.event==='auth.ok'||d.event==='tick'))){
         setConn('on');
         addFeed('s','✅ Autenticado correctamente');
         document.getElementById('pamAct').textContent='Online — escuchando mensajes';
