@@ -1,256 +1,34 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-03-16T21:20:23.504Z",
-  "updatedBy": "Dashboard",
+  "lastUpdated": "2026-03-16",
+  "updatedBy": "sistema",
   "stages": [
-    {
-      "id": "venta",
-      "name": "Venta",
-      "color": "#7c3aed",
-      "short": "VTA"
-    },
-    {
-      "id": "cuestionario",
-      "name": "Cuestionario",
-      "color": "#6366f1",
-      "short": "CUES"
-    },
-    {
-      "id": "prep_campo",
-      "name": "Prep. Campo",
-      "color": "#0ea5e9",
-      "short": "PREP"
-    },
-    {
-      "id": "campo",
-      "name": "Campo",
-      "color": "#06b6d4",
-      "short": "CAMP"
-    },
-    {
-      "id": "cierre_base",
-      "name": "Cierre de Base",
-      "color": "#10b981",
-      "short": "CB"
-    },
-    {
-      "id": "ponderacion",
-      "name": "Ponderacion",
-      "color": "#84cc16",
-      "short": "POND"
-    },
-    {
-      "id": "produccion",
-      "name": "Produccion",
-      "color": "#eab308",
-      "short": "PROD"
-    },
-    {
-      "id": "ensamble",
-      "name": "Ensamble",
-      "color": "#f97316",
-      "short": "ENS"
-    },
-    {
-      "id": "entrega",
-      "name": "Entrega",
-      "color": "#ef4444",
-      "short": "ENT"
-    },
-    {
-      "id": "admin",
-      "name": "Admin",
-      "color": "#6b7280",
-      "short": "ADM"
-    }
+    {"id":"venta","name":"Venta","color":"#7c3aed","short":"VTA"},
+    {"id":"cuestionario","name":"Cuestionario","color":"#6366f1","short":"CUES"},
+    {"id":"prep_campo","name":"Prep. Campo","color":"#0ea5e9","short":"PREP"},
+    {"id":"campo","name":"Campo","color":"#06b6d4","short":"CAMP"},
+    {"id":"cierre_base","name":"Cierre de Base","color":"#10b981","short":"CB"},
+    {"id":"ponderacion","name":"Ponderacion","color":"#84cc16","short":"POND"},
+    {"id":"produccion","name":"Produccion","color":"#eab308","short":"PROD"},
+    {"id":"ensamble","name":"Ensamble","color":"#f97316","short":"ENS"},
+    {"id":"entrega","name":"Entrega","color":"#ef4444","short":"ENT"},
+    {"id":"admin","name":"Admin","color":"#6b7280","short":"ADM"}
   ],
   "projects": [
-    {
-      "id": "uruguay",
-      "name": "Uruguay",
-      "region": "latam",
-      "flag": "UY",
-      "stage": "ensamble",
-      "urgent": true,
-      "responsible": "Diego + Manuel",
-      "nextAction": "Unificar Cuanti+Cuali â Esteban (revisiÃ³n) â Diego+Manuel (analÃ­tica) â viaje 23-25/03",
-      "notes": "MÃ¡s urgente del bloque internacional. Sacar pasajes."
-    },
-    {
-      "id": "bariloche",
-      "name": "Bariloche",
-      "region": "argentina",
-      "flag": "AR",
-      "stage": "cuestionario",
-      "urgent": false,
-      "responsible": "",
-      "nextAction": "Armar pre-cuestionario (sin urgencia â cliente quiere salir en abril)",
-      "notes": "Ãnico proyecto ARG con presupuesto aprobado listo para avanzar."
-    },
-    {
-      "id": "san_lorenzo",
-      "name": "San Lorenzo",
-      "region": "argentina",
-      "flag": "AR",
-      "stage": "cuestionario",
-      "urgent": false,
-      "responsible": "",
-      "nextAction": "Preparar cuestionario para encuesta 3",
-      "notes": "En curso, encuesta 3."
-    },
-    {
-      "id": "lomas",
-      "name": "Lomas",
-      "region": "argentina",
-      "flag": "AR",
-      "stage": "cuestionario",
-      "urgent": false,
-      "responsible": "",
-      "nextAction": "Pendiente aprobaciÃ³n del cuestionario",
-      "notes": "Cuestionario enviado al cliente."
-    },
-    {
-      "id": "venezuela",
-      "name": "Venezuela (jÃ³venes)",
-      "region": "latam",
-      "flag": "LATAM",
-      "stage": "cuestionario",
-      "urgent": false,
-      "responsible": "",
-      "nextAction": "Pendiente aprobaciÃ³n para pasar a campo",
-      "notes": "Cuestionario enviado."
-    },
-    {
-      "id": "ciudades_pba",
-      "name": "Ciudades PBA",
-      "region": "argentina",
-      "flag": "AR",
-      "stage": "venta",
-      "urgent": true,
-      "responsible": "Diego",
-      "nextAction": "Diego revisa presupuesto armado y lo envÃ­a",
-      "notes": "Presupuesto armado pero no enviado aÃºn â acciÃ³n pendiente inminente."
-    },
-    {
-      "id": "chivilcoy",
-      "name": "Chivilcoy",
-      "region": "argentina",
-      "flag": "AR",
-      "stage": "venta",
-      "urgent": false,
-      "responsible": "",
-      "nextAction": "Esperar confirmaciÃ³n de aprobaciÃ³n del presupuesto",
-      "notes": ""
-    },
-    {
-      "id": "ferro",
-      "name": "Ferro",
-      "region": "argentina",
-      "flag": "AR",
-      "stage": "venta",
-      "urgent": false,
-      "responsible": "",
-      "nextAction": "Pendiente aprobaciÃ³n del presupuesto",
-      "notes": "Presupuesto enviado."
-    },
-    {
-      "id": "mar_del_plata",
-      "name": "Mar del Plata",
-      "region": "argentina",
-      "flag": "AR",
-      "stage": "venta",
-      "urgent": false,
-      "responsible": "",
-      "nextAction": "Pendiente aprobaciÃ³n del presupuesto",
-      "notes": "Presupuesto enviado."
-    },
-    {
-      "id": "la_matanza",
-      "name": "La Matanza",
-      "region": "argentina",
-      "flag": "AR",
-      "stage": "venta",
-      "urgent": false,
-      "responsible": "",
-      "nextAction": "Pendiente aprobaciÃ³n del presupuesto",
-      "notes": "Presupuesto enviado."
-    },
-    {
-      "id": "hilario_nqn",
-      "name": "Hilario (NQN)",
-      "region": "argentina",
-      "flag": "AR",
-      "stage": "venta",
-      "urgent": false,
-      "responsible": "",
-      "nextAction": "Preparar y enviar presupuesto",
-      "notes": ""
-    },
-    {
-      "id": "encuesta_nacional",
-      "name": "Encuesta Nacional",
-      "region": "argentina",
-      "flag": "AR",
-      "stage": "venta",
-      "urgent": false,
-      "responsible": "Diego",
-      "nextAction": "Ver a quiÃ©n mÃ¡s enviar",
-      "notes": ""
-    },
-    {
-      "id": "la_rioja",
-      "name": "La Rioja",
-      "region": "latam",
-      "flag": "LATAM",
-      "stage": "venta",
-      "urgent": false,
-      "responsible": "",
-      "nextAction": "Pendiente aprobaciÃ³n del presupuesto",
-      "notes": "Presupuesto enviado."
-    },
-    {
-      "id": "nueva_leon",
-      "name": "Nueva LeÃ³n (MÃ©xico)",
-      "region": "latam",
-      "flag": "LATAM",
-      "stage": "entrega",
-      "urgent": false,
-      "responsible": "",
-      "nextAction": "Pendiente viaje",
-      "notes": "Final â pendiente presentaciÃ³n presencial."
-    },
-    {
-      "id": "colombia",
-      "name": "Colombia",
-      "region": "latam",
-      "flag": "LATAM",
-      "stage": "venta",
-      "urgent": false,
-      "responsible": "Diego",
-      "nextAction": "Hablar con MarÃ­a JosÃ©",
-      "notes": "En proceso."
-    },
-    {
-      "id": "dominicana",
-      "name": "Dominicana",
-      "region": "latam",
-      "flag": "LATAM",
-      "stage": "venta",
-      "urgent": false,
-      "responsible": "Diego",
-      "nextAction": "Hablar con AndrÃ©s",
-      "notes": "En proceso."
-    },
-    {
-      "id": "china",
-      "name": "China",
-      "region": "latam",
-      "flag": "LATAM",
-      "stage": "venta",
-      "urgent": false,
-      "responsible": "",
-      "nextAction": "Mantener en pendiente",
-      "notes": "En espera."
-    }
+    {"id":"ciudades-pba","name":"Ciudades PBA","region":"argentina","flag":"AR","stage":"venta","urgent":true,"responsible":"Diego","nextAction":"Diego revisa presupuesto armado y lo envia","notes":""},
+    {"id":"chivilcoy","name":"Chivilcoy","region":"argentina","flag":"AR","stage":"venta","urgent":false,"responsible":"Diego","nextAction":"Esperar confirmacion de aprobacion del presupuesto","notes":""},
+    {"id":"ferro","name":"Ferro","region":"argentina","flag":"AR","stage":"venta","urgent":false,"responsible":"Diego","nextAction":"Pendiente aprobacion del presupuesto","notes":""},
+    {"id":"mar-del-plata","name":"Mar del Plata","region":"argentina","flag":"AR","stage":"venta","urgent":false,"responsible":"Diego","nextAction":"Pendiente aprobacion del presupuesto","notes":""},
+    {"id":"la-matanza","name":"La Matanza","region":"argentina","flag":"AR","stage":"venta","urgent":false,"responsible":"Diego","nextAction":"Pendiente aprobacion del presupuesto","notes":""},
+    {"id":"hilario-nqn","name":"Hilario (NQN)","region":"argentina","flag":"AR","stage":"venta","urgent":false,"responsible":"Diego","nextAction":"Preparar y enviar presupuesto","notes":""},
+    {"id":"encuesta-nacional","name":"Encuesta Nacional","region":"argentina","flag":"AR","stage":"venta","urgent":false,"responsible":"Diego","nextAction":"Ver a quien mas enviar","notes":""},
+    {"id":"bariloche","name":"Bariloche","region":"argentina","flag":"AR","stage":"cuestionario","urgent":false,"responsible":"Equipo","nextAction":"Armar pre-cuestionario (sin urgencia, cliente quiere salir en abril)","notes":""},
+    {"id":"san-lorenzo","name":"San Lorenzo","region":"argentina","flag":"AR","stage":"cuestionario","urgent":false,"responsible":"Equipo","nextAction":"Preparar cuestionario para encuesta 3","notes":""},
+    {"id":"lomas","name":"Lomas","region":"argentina","flag":"AR","stage":"cuestionario","urgent":false,"responsible":"Equipo","nextAction":"Pendiente aprobacion del cuestionario","notes":""},
+    {"id":"venezuela-jovenes","name":"Venezuela (jovenes)","region":"latam","flag":"LATAM","stage":"cuestionario","urgent":false,"responsible":"Equipo","nextAction":"Pendiente aprobacion para pasar a campo","notes":""},
+    {"id":"uruguay","name":"Uruguay","region":"latam","flag":"UY","stage":"produccion","urgent":true,"responsible":"Diego + Manuel","nextAction":"Unificar Cuanti+Cuali, Esteban revision, Diego+Manuel analitica, viaje 23-25 marzo","notes":"Urgente sacar pasajes"},
+    {"id":"nueva-leon","name":"Nueva Leon (Mexico)","region":"latam","flag":"MX","stage":"entrega","urgent":false,"responsible":"Equipo","nextAction":"Pendiente viaje","notes":""},
+    {"id":"villa-crespo","name":"Villa Crespo","region":"argentina","flag":"AR","stage":"venta","urgent":false,"responsible":"Diego","nextAction":"Pendiente presupuesto","notes":""},
+    {"id":"palermo","name":"Palermo","region":"argentina","flag":"AR","stage":"venta","urgent":false,"responsible":"Diego","nextAction":"Pendiente presupuesto","notes":""}
   ]
 }
