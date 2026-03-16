@@ -1,7 +1,7 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-03-16",
-  "updatedBy": "sistema",
+  "lastUpdated": "2026-03-16T21:20:18.777Z",
+  "updatedBy": "Dashboard",
   "stages": [
     {
       "id": "venta",
@@ -73,19 +73,19 @@
       "stage": "produccion",
       "urgent": true,
       "responsible": "Diego + Manuel",
-      "nextAction": "Unificar Cuanti+Cuali \u00e2\u0086\u0092 Esteban (revisi\u00c3\u00b3n) \u00e2\u0086\u0092 Diego+Manuel (anal\u00c3\u00adtica) \u00e2\u0086\u0092 viaje 23-25/03",
-      "notes": "M\u00c3\u00a1s urgente del bloque internacional. Sacar pasajes."
+      "nextAction": "Unificar Cuanti+Cuali â Esteban (revisiÃ³n) â Diego+Manuel (analÃ­tica) â viaje 23-25/03",
+      "notes": "MÃ¡s urgente del bloque internacional. Sacar pasajes."
     },
     {
       "id": "bariloche",
       "name": "Bariloche",
       "region": "argentina",
       "flag": "AR",
-      "stage": "ponderacion",
+      "stage": "cuestionario",
       "urgent": false,
       "responsible": "",
-      "nextAction": "Armar pre-cuestionario (sin urgencia \u00e2\u0080\u0094 cliente quiere salir en abril)",
-      "notes": "\u00c3\u009anico proyecto ARG con presupuesto aprobado listo para avanzar."
+      "nextAction": "Armar pre-cuestionario (sin urgencia â cliente quiere salir en abril)",
+      "notes": "Ãnico proyecto ARG con presupuesto aprobado listo para avanzar."
     },
     {
       "id": "san_lorenzo",
@@ -106,18 +106,18 @@
       "stage": "cuestionario",
       "urgent": false,
       "responsible": "",
-      "nextAction": "Pendiente aprobaci\u00c3\u00b3n del cuestionario",
+      "nextAction": "Pendiente aprobaciÃ³n del cuestionario",
       "notes": "Cuestionario enviado al cliente."
     },
     {
       "id": "venezuela",
-      "name": "Venezuela (j\u00c3\u00b3venes)",
+      "name": "Venezuela (jÃ³venes)",
       "region": "latam",
       "flag": "LATAM",
       "stage": "cuestionario",
       "urgent": false,
       "responsible": "",
-      "nextAction": "Pendiente aprobaci\u00c3\u00b3n para pasar a campo",
+      "nextAction": "Pendiente aprobaciÃ³n para pasar a campo",
       "notes": "Cuestionario enviado."
     },
     {
@@ -128,8 +128,8 @@
       "stage": "venta",
       "urgent": true,
       "responsible": "Diego",
-      "nextAction": "Diego revisa presupuesto armado y lo env\u00c3\u00ada",
-      "notes": "Presupuesto armado pero no enviado a\u00c3\u00ban \u00e2\u0080\u0094 acci\u00c3\u00b3n pendiente inminente."
+      "nextAction": "Diego revisa presupuesto armado y lo envÃ­a",
+      "notes": "Presupuesto armado pero no enviado aÃºn â acciÃ³n pendiente inminente."
     },
     {
       "id": "chivilcoy",
@@ -139,7 +139,7 @@
       "stage": "venta",
       "urgent": false,
       "responsible": "",
-      "nextAction": "Esperar confirmaci\u00c3\u00b3n de aprobaci\u00c3\u00b3n del presupuesto",
+      "nextAction": "Esperar confirmaciÃ³n de aprobaciÃ³n del presupuesto",
       "notes": ""
     },
     {
@@ -150,7 +150,7 @@
       "stage": "venta",
       "urgent": false,
       "responsible": "",
-      "nextAction": "Pendiente aprobaci\u00c3\u00b3n del presupuesto",
+      "nextAction": "Pendiente aprobaciÃ³n del presupuesto",
       "notes": "Presupuesto enviado."
     },
     {
@@ -161,7 +161,7 @@
       "stage": "venta",
       "urgent": false,
       "responsible": "",
-      "nextAction": "Pendiente aprobaci\u00c3\u00b3n del presupuesto",
+      "nextAction": "Pendiente aprobaciÃ³n del presupuesto",
       "notes": "Presupuesto enviado."
     },
     {
@@ -172,7 +172,7 @@
       "stage": "venta",
       "urgent": false,
       "responsible": "",
-      "nextAction": "Pendiente aprobaci\u00c3\u00b3n del presupuesto",
+      "nextAction": "Pendiente aprobaciÃ³n del presupuesto",
       "notes": "Presupuesto enviado."
     },
     {
@@ -194,7 +194,7 @@
       "stage": "venta",
       "urgent": false,
       "responsible": "Diego",
-      "nextAction": "Ver a qui\u00c3\u00a9n m\u00c3\u00a1s enviar",
+      "nextAction": "Ver a quiÃ©n mÃ¡s enviar",
       "notes": ""
     },
     {
@@ -205,19 +205,19 @@
       "stage": "venta",
       "urgent": false,
       "responsible": "",
-      "nextAction": "Pendiente aprobaci\u00c3\u00b3n del presupuesto",
+      "nextAction": "Pendiente aprobaciÃ³n del presupuesto",
       "notes": "Presupuesto enviado."
     },
     {
       "id": "nueva_leon",
-      "name": "Nueva Le\u00c3\u00b3n (M\u00c3\u00a9xico)",
+      "name": "Nueva LeÃ³n (MÃ©xico)",
       "region": "latam",
       "flag": "LATAM",
       "stage": "entrega",
       "urgent": false,
       "responsible": "",
       "nextAction": "Pendiente viaje",
-      "notes": "Final \u00e2\u0080\u0094 pendiente presentaci\u00c3\u00b3n presencial."
+      "notes": "Final â pendiente presentaciÃ³n presencial."
     },
     {
       "id": "colombia",
@@ -227,7 +227,7 @@
       "stage": "venta",
       "urgent": false,
       "responsible": "Diego",
-      "nextAction": "Hablar con Mar\u00c3\u00ada Jos\u00c3\u00a9",
+      "nextAction": "Hablar con MarÃ­a JosÃ©",
       "notes": "En proceso."
     },
     {
@@ -238,7 +238,7 @@
       "stage": "venta",
       "urgent": false,
       "responsible": "Diego",
-      "nextAction": "Hablar con Andr\u00c3\u00a9s",
+      "nextAction": "Hablar con AndrÃ©s",
       "notes": "En proceso."
     },
     {
