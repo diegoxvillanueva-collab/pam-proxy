@@ -1,67 +1,67 @@
 {
-  "version": 1,
-  "lastUpdated": "2026-03-16T20:57:25.270Z",
-  "updatedBy": "Dashboard",
+  "version": "1.0",
+  "lastUpdated": "2026-03-16",
+  "updatedBy": "sistema",
   "stages": [
     {
       "id": "venta",
-      "name": "ð¼ Venta",
-      "color": "#3b82f6",
-      "short": "Venta"
+      "name": "Venta",
+      "color": "#7c3aed",
+      "short": "VTA"
     },
     {
       "id": "cuestionario",
-      "name": "ð Cuestionario",
-      "color": "#8b5cf6",
-      "short": "Cues."
+      "name": "Cuestionario",
+      "color": "#6366f1",
+      "short": "CUES"
     },
     {
       "id": "prep_campo",
-      "name": "ð§ Prep. Campo",
-      "color": "#f59e0b",
-      "short": "Prep."
+      "name": "Prep. Campo",
+      "color": "#0ea5e9",
+      "short": "PREP"
     },
     {
       "id": "campo",
-      "name": "ð¡ Campo",
-      "color": "#ef4444",
-      "short": "Campo"
+      "name": "Campo",
+      "color": "#06b6d4",
+      "short": "CAMP"
     },
     {
       "id": "cierre_base",
-      "name": "ðï¸ Cierre de Base",
-      "color": "#06b6d4",
-      "short": "Base"
+      "name": "Cierre de Base",
+      "color": "#10b981",
+      "short": "CB"
     },
     {
       "id": "ponderacion",
-      "name": "âï¸ PonderaciÃ³n",
-      "color": "#10b981",
-      "short": "Pond."
+      "name": "Ponderacion",
+      "color": "#84cc16",
+      "short": "POND"
     },
     {
       "id": "produccion",
-      "name": "ð ProducciÃ³n",
-      "color": "#f97316",
-      "short": "Prod."
+      "name": "Produccion",
+      "color": "#eab308",
+      "short": "PROD"
     },
     {
       "id": "ensamble",
-      "name": "ð Ensamble",
-      "color": "#ec4899",
-      "short": "Ensam."
+      "name": "Ensamble",
+      "color": "#f97316",
+      "short": "ENS"
     },
     {
       "id": "entrega",
-      "name": "ð¤ Entrega",
-      "color": "#84cc16",
-      "short": "Entr."
+      "name": "Entrega",
+      "color": "#ef4444",
+      "short": "ENT"
     },
     {
       "id": "admin",
-      "name": "ð° Admin",
-      "color": "#a78bfa",
-      "short": "Admin"
+      "name": "Admin",
+      "color": "#6b7280",
+      "short": "ADM"
     }
   ],
   "projects": [
@@ -69,29 +69,29 @@
       "id": "uruguay",
       "name": "Uruguay",
       "region": "latam",
-      "flag": "ð",
+      "flag": "UY",
       "stage": "produccion",
       "urgent": true,
       "responsible": "Diego + Manuel",
-      "nextAction": "Unificar Cuanti+Cuali â Esteban (revisiÃ³n) â Diego+Manuel (analÃ­tica) â viaje 23-25/03",
-      "notes": "MÃ¡s urgente del bloque internacional. Sacar pasajes."
+      "nextAction": "Unificar Cuanti+Cuali \u00e2\u0086\u0092 Esteban (revisi\u00c3\u00b3n) \u00e2\u0086\u0092 Diego+Manuel (anal\u00c3\u00adtica) \u00e2\u0086\u0092 viaje 23-25/03",
+      "notes": "M\u00c3\u00a1s urgente del bloque internacional. Sacar pasajes."
     },
     {
       "id": "bariloche",
       "name": "Bariloche",
       "region": "argentina",
-      "flag": "ð¦ð·",
+      "flag": "AR",
       "stage": "ponderacion",
       "urgent": false,
       "responsible": "",
-      "nextAction": "Armar pre-cuestionario (sin urgencia â cliente quiere salir en abril)",
-      "notes": "Ãnico proyecto ARG con presupuesto aprobado listo para avanzar."
+      "nextAction": "Armar pre-cuestionario (sin urgencia \u00e2\u0080\u0094 cliente quiere salir en abril)",
+      "notes": "\u00c3\u009anico proyecto ARG con presupuesto aprobado listo para avanzar."
     },
     {
       "id": "san_lorenzo",
       "name": "San Lorenzo",
       "region": "argentina",
-      "flag": "ð¦ð·",
+      "flag": "AR",
       "stage": "cuestionario",
       "urgent": false,
       "responsible": "",
@@ -102,84 +102,84 @@
       "id": "lomas",
       "name": "Lomas",
       "region": "argentina",
-      "flag": "ð¦ð·",
+      "flag": "AR",
       "stage": "cuestionario",
       "urgent": false,
       "responsible": "",
-      "nextAction": "Pendiente aprobaciÃ³n del cuestionario",
+      "nextAction": "Pendiente aprobaci\u00c3\u00b3n del cuestionario",
       "notes": "Cuestionario enviado al cliente."
     },
     {
       "id": "venezuela",
-      "name": "Venezuela (jÃ³venes)",
+      "name": "Venezuela (j\u00c3\u00b3venes)",
       "region": "latam",
-      "flag": "ð",
+      "flag": "LATAM",
       "stage": "cuestionario",
       "urgent": false,
       "responsible": "",
-      "nextAction": "Pendiente aprobaciÃ³n para pasar a campo",
+      "nextAction": "Pendiente aprobaci\u00c3\u00b3n para pasar a campo",
       "notes": "Cuestionario enviado."
     },
     {
       "id": "ciudades_pba",
       "name": "Ciudades PBA",
       "region": "argentina",
-      "flag": "ð¦ð·",
+      "flag": "AR",
       "stage": "venta",
       "urgent": true,
       "responsible": "Diego",
-      "nextAction": "Diego revisa presupuesto armado y lo envÃ­a",
-      "notes": "Presupuesto armado pero no enviado aÃºn â acciÃ³n pendiente inminente."
+      "nextAction": "Diego revisa presupuesto armado y lo env\u00c3\u00ada",
+      "notes": "Presupuesto armado pero no enviado a\u00c3\u00ban \u00e2\u0080\u0094 acci\u00c3\u00b3n pendiente inminente."
     },
     {
       "id": "chivilcoy",
       "name": "Chivilcoy",
       "region": "argentina",
-      "flag": "ð¦ð·",
+      "flag": "AR",
       "stage": "venta",
       "urgent": false,
       "responsible": "",
-      "nextAction": "Esperar confirmaciÃ³n de aprobaciÃ³n del presupuesto",
+      "nextAction": "Esperar confirmaci\u00c3\u00b3n de aprobaci\u00c3\u00b3n del presupuesto",
       "notes": ""
     },
     {
       "id": "ferro",
       "name": "Ferro",
       "region": "argentina",
-      "flag": "ð¦ð·",
+      "flag": "AR",
       "stage": "venta",
       "urgent": false,
       "responsible": "",
-      "nextAction": "Pendiente aprobaciÃ³n del presupuesto",
+      "nextAction": "Pendiente aprobaci\u00c3\u00b3n del presupuesto",
       "notes": "Presupuesto enviado."
     },
     {
       "id": "mar_del_plata",
       "name": "Mar del Plata",
       "region": "argentina",
-      "flag": "ð¦ð·",
+      "flag": "AR",
       "stage": "venta",
       "urgent": false,
       "responsible": "",
-      "nextAction": "Pendiente aprobaciÃ³n del presupuesto",
+      "nextAction": "Pendiente aprobaci\u00c3\u00b3n del presupuesto",
       "notes": "Presupuesto enviado."
     },
     {
       "id": "la_matanza",
       "name": "La Matanza",
       "region": "argentina",
-      "flag": "ð¦ð·",
+      "flag": "AR",
       "stage": "venta",
       "urgent": false,
       "responsible": "",
-      "nextAction": "Pendiente aprobaciÃ³n del presupuesto",
+      "nextAction": "Pendiente aprobaci\u00c3\u00b3n del presupuesto",
       "notes": "Presupuesto enviado."
     },
     {
       "id": "hilario_nqn",
       "name": "Hilario (NQN)",
       "region": "argentina",
-      "flag": "ð¦ð·",
+      "flag": "AR",
       "stage": "venta",
       "urgent": false,
       "responsible": "",
@@ -190,62 +190,62 @@
       "id": "encuesta_nacional",
       "name": "Encuesta Nacional",
       "region": "argentina",
-      "flag": "ð¦ð·",
+      "flag": "AR",
       "stage": "venta",
       "urgent": false,
       "responsible": "Diego",
-      "nextAction": "Ver a quiÃ©n mÃ¡s enviar",
+      "nextAction": "Ver a qui\u00c3\u00a9n m\u00c3\u00a1s enviar",
       "notes": ""
     },
     {
       "id": "la_rioja",
       "name": "La Rioja",
       "region": "latam",
-      "flag": "ð",
+      "flag": "LATAM",
       "stage": "venta",
       "urgent": false,
       "responsible": "",
-      "nextAction": "Pendiente aprobaciÃ³n del presupuesto",
+      "nextAction": "Pendiente aprobaci\u00c3\u00b3n del presupuesto",
       "notes": "Presupuesto enviado."
     },
     {
       "id": "nueva_leon",
-      "name": "Nueva LeÃ³n (MÃ©xico)",
+      "name": "Nueva Le\u00c3\u00b3n (M\u00c3\u00a9xico)",
       "region": "latam",
-      "flag": "ð",
+      "flag": "LATAM",
       "stage": "entrega",
       "urgent": false,
       "responsible": "",
       "nextAction": "Pendiente viaje",
-      "notes": "Final â pendiente presentaciÃ³n presencial."
+      "notes": "Final \u00e2\u0080\u0094 pendiente presentaci\u00c3\u00b3n presencial."
     },
     {
       "id": "colombia",
       "name": "Colombia",
       "region": "latam",
-      "flag": "ð",
+      "flag": "LATAM",
       "stage": "venta",
       "urgent": false,
       "responsible": "Diego",
-      "nextAction": "Hablar con MarÃ­a JosÃ©",
+      "nextAction": "Hablar con Mar\u00c3\u00ada Jos\u00c3\u00a9",
       "notes": "En proceso."
     },
     {
       "id": "dominicana",
       "name": "Dominicana",
       "region": "latam",
-      "flag": "ð",
+      "flag": "LATAM",
       "stage": "venta",
       "urgent": false,
       "responsible": "Diego",
-      "nextAction": "Hablar con AndrÃ©s",
+      "nextAction": "Hablar con Andr\u00c3\u00a9s",
       "notes": "En proceso."
     },
     {
       "id": "china",
       "name": "China",
       "region": "latam",
-      "flag": "ð",
+      "flag": "LATAM",
       "stage": "venta",
       "urgent": false,
       "responsible": "",
