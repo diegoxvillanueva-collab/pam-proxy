@@ -577,7 +577,11 @@ function askPamCal(){
 // ══════════════════════════════════════════════════
 // PROYECTOS / GITHUB API
 // ══════════════════════════════════════════════════
-function ghToken(){return document.getElementById('cfgGh').value.trim();}
+function b64toUtf8(b64){
+    const bytes=new Uint8Array(atob(b64.replace(/\n/g,'')).split('').map(c=>c.charCodeAt(0)));
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+  function ghToken(){return document.getElementById('cfgGh').value.trim();}
 
 async function syncProyectos(){
   document.getElementById('syncTxt').textContent='Sincronizando...';
@@ -590,7 +594,7 @@ async function syncProyectos(){
     if(!r.ok)throw new Error('HTTP '+r.status);
     const j=await r.json();
     ghFileSha=j.sha;
-    proyData=JSON.parse(atob(j.content.replace(/\n/g,'')));
+    proyData=JSON.parse(b64toUtf8(j.content));
     renderKanban();
     const t=new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
     document.getElementById('syncTxt').textContent='Actualizado '+t;
