@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-03-16T21:20:18.777Z",
+  "lastUpdated": "2026-03-16T21:20:23.504Z",
   "updatedBy": "Dashboard",
   "stages": [
     {
@@ -70,7 +70,7 @@
       "name": "Uruguay",
       "region": "latam",
       "flag": "UY",
-      "stage": "produccion",
+      "stage": "ensamble",
       "urgent": true,
       "responsible": "Diego + Manuel",
       "nextAction": "Unificar Cuanti+Cuali â Esteban (revisiÃ³n) â Diego+Manuel (analÃ­tica) â viaje 23-25/03",
