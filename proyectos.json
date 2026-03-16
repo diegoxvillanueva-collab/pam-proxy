@@ -1,0 +1,206 @@
+{
+  "version": 1,
+  "lastUpdated": "2026-03-17T00:00:00Z",
+  "updatedBy": "PAM",
+  "stages": [
+    { "id": "venta",       "name": "💼 Venta",          "color": "#3b82f6", "short": "Venta" },
+    { "id": "cuestionario","name": "📝 Cuestionario",   "color": "#8b5cf6", "short": "Cues." },
+    { "id": "prep_campo",  "name": "🔧 Prep. Campo",    "color": "#f59e0b", "short": "Prep." },
+    { "id": "campo",       "name": "📡 Campo",           "color": "#ef4444", "short": "Campo" },
+    { "id": "cierre_base", "name": "🗃️ Cierre de Base", "color": "#06b6d4", "short": "Base"  },
+    { "id": "ponderacion", "name": "⚖️ Ponderación",    "color": "#10b981", "short": "Pond." },
+    { "id": "produccion",  "name": "📊 Producción",     "color": "#f97316", "short": "Prod." },
+    { "id": "ensamble",    "name": "🔗 Ensamble",        "color": "#ec4899", "short": "Ensam."},
+    { "id": "entrega",     "name": "📤 Entrega",         "color": "#84cc16", "short": "Entr." },
+    { "id": "admin",       "name": "💰 Admin",           "color": "#a78bfa", "short": "Admin" }
+  ],
+  "projects": [
+    {
+      "id": "uruguay",
+      "name": "Uruguay",
+      "region": "latam",
+      "flag": "🌎",
+      "stage": "produccion",
+      "urgent": true,
+      "responsible": "Diego + Manuel",
+      "nextAction": "Unificar Cuanti+Cuali → Esteban (revisión) → Diego+Manuel (analítica) → viaje 23-25/03",
+      "notes": "Más urgente del bloque internacional. Sacar pasajes."
+    },
+    {
+      "id": "bariloche",
+      "name": "Bariloche",
+      "region": "argentina",
+      "flag": "🇦🇷",
+      "stage": "cuestionario",
+      "urgent": false,
+      "responsible": "",
+      "nextAction": "Armar pre-cuestionario (sin urgencia — cliente quiere salir en abril)",
+      "notes": "Único proyecto ARG con presupuesto aprobado listo para avanzar."
+    },
+    {
+      "id": "san_lorenzo",
+      "name": "San Lorenzo",
+      "region": "argentina",
+      "flag": "🇦🇷",
+      "stage": "cuestionario",
+      "urgent": false,
+      "responsible": "",
+      "nextAction": "Preparar cuestionario para encuesta 3",
+      "notes": "En curso, encuesta 3."
+    },
+    {
+      "id": "lomas",
+      "name": "Lomas",
+      "region": "argentina",
+      "flag": "🇦🇷",
+      "stage": "cuestionario",
+      "urgent": false,
+      "responsible": "",
+      "nextAction": "Pendiente aprobación del cuestionario",
+      "notes": "Cuestionario enviado al cliente."
+    },
+    {
+      "id": "venezuela",
+      "name": "Venezuela (jóvenes)",
+      "region": "latam",
+      "flag": "🌎",
+      "stage": "cuestionario",
+      "urgent": false,
+      "responsible": "",
+      "nextAction": "Pendiente aprobación para pasar a campo",
+      "notes": "Cuestionario enviado."
+    },
+    {
+      "id": "ciudades_pba",
+      "name": "Ciudades PBA",
+      "region": "argentina",
+      "flag": "🇦🇷",
+      "stage": "venta",
+      "urgent": true,
+      "responsible": "Diego",
+      "nextAction": "Diego revisa presupuesto armado y lo envía",
+      "notes": "Presupuesto armado pero no enviado aún — acción pendiente inminente."
+    },
+    {
+      "id": "chivilcoy",
+      "name": "Chivilcoy",
+      "region": "argentina",
+      "flag": "🇦🇷",
+      "stage": "venta",
+      "urgent": false,
+      "responsible": "",
+      "nextAction": "Esperar confirmación de aprobación del presupuesto",
+      "notes": ""
+    },
+    {
+      "id": "ferro",
+      "name": "Ferro",
+      "region": "argentina",
+      "flag": "🇦🇷",
+      "stage": "venta",
+      "urgent": false,
+      "responsible": "",
+      "nextAction": "Pendiente aprobación del presupuesto",
+      "notes": "Presupuesto enviado."
+    },
+    {
+      "id": "mar_del_plata",
+      "name": "Mar del Plata",
+      "region": "argentina",
+      "flag": "🇦🇷",
+      "stage": "venta",
+      "urgent": false,
+      "responsible": "",
+      "nextAction": "Pendiente aprobación del presupuesto",
+      "notes": "Presupuesto enviado."
+    },
+    {
+      "id": "la_matanza",
+      "name": "La Matanza",
+      "region": "argentina",
+      "flag": "🇦🇷",
+      "stage": "venta",
+      "urgent": false,
+      "responsible": "",
+      "nextAction": "Pendiente aprobación del presupuesto",
+      "notes": "Presupuesto enviado."
+    },
+    {
+      "id": "hilario_nqn",
+      "name": "Hilario (NQN)",
+      "region": "argentina",
+      "flag": "🇦🇷",
+      "stage": "venta",
+      "urgent": false,
+      "responsible": "",
+      "nextAction": "Preparar y enviar presupuesto",
+      "notes": ""
+    },
+    {
+      "id": "encuesta_nacional",
+      "name": "Encuesta Nacional",
+      "region": "argentina",
+      "flag": "🇦🇷",
+      "stage": "venta",
+      "urgent": false,
+      "responsible": "Diego",
+      "nextAction": "Ver a quién más enviar",
+      "notes": ""
+    },
+    {
+      "id": "la_rioja",
+      "name": "La Rioja",
+      "region": "latam",
+      "flag": "🌎",
+      "stage": "venta",
+      "urgent": false,
+      "responsible": "",
+      "nextAction": "Pendiente aprobación del presupuesto",
+      "notes": "Presupuesto enviado."
+    },
+    {
+      "id": "nueva_leon",
+      "name": "Nueva León (México)",
+      "region": "latam",
+      "flag": "🌎",
+      "stage": "entrega",
+      "urgent": false,
+      "responsible": "",
+      "nextAction": "Pendiente viaje",
+      "notes": "Final — pendiente presentación presencial."
+    },
+    {
+      "id": "colombia",
+      "name": "Colombia",
+      "region": "latam",
+      "flag": "🌎",
+      "stage": "venta",
+      "urgent": false,
+      "responsible": "Diego",
+      "nextAction": "Hablar con María José",
+      "notes": "En proceso."
+    },
+    {
+      "id": "dominicana",
+      "name": "Dominicana",
+      "region": "latam",
+      "flag": "🌎",
+      "stage": "venta",
+      "urgent": false,
+      "responsible": "Diego",
+      "nextAction": "Hablar con Andrés",
+      "notes": "En proceso."
+    },
+    {
+      "id": "china",
+      "name": "China",
+      "region": "latam",
+      "flag": "🌎",
+      "stage": "venta",
+      "urgent": false,
+      "responsible": "",
+      "nextAction": "Mantener en pendiente",
+      "notes": "En espera."
+    }
+  ]
+}

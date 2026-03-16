@@ -3,423 +3,789 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PAM — Centro de Operaciones</title>
+<title>PAM — Centro de Operaciones · Ágora</title>
 <style>
-  :root {
-    --bg: #0d0f14; --surface: #161920; --surface2: #1e2230; --border: #2a2f3d;
-    --accent: #4f8ef7; --accent2: #7c5cbf; --green: #2ecc71; --yellow: #f1c40f;
-    --red: #e74c3c; --text: #e8eaf0; --muted: #6b7280; --font: "Inter", system-ui, sans-serif;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
-  header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 28px; border-bottom: 1px solid var(--border); background: var(--surface);
-  }
-  header .logo { display: flex; align-items: center; gap: 12px; }
-  header .logo-icon {
-    width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 10px; display: flex; align-items: center; justify-content: center;
-    font-size: 18px; font-weight: 800; color: white;
-  }
-  header h1 { font-size: 18px; font-weight: 700; }
-  header .subtitle { font-size: 12px; color: var(--muted); margin-top: 1px; }
-  .status-badge {
-    display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px;
-    font-size: 12px; font-weight: 600; background: rgba(46,204,113,0.12); color: var(--green);
-    border: 1px solid rgba(46,204,113,0.25);
-  }
-  .status-badge .dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  .main { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; padding: 20px 24px; max-width: 1400px; margin: 0 auto; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
-  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-  .card-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
-  .card-badge { font-size: 11px; padding: 3px 8px; border-radius: 8px; font-weight: 600; }
-  .badge-green { background: rgba(46,204,113,0.15); color: var(--green); }
-  .badge-yellow { background: rgba(241,196,15,0.15); color: var(--yellow); }
-  .badge-blue { background: rgba(79,142,247,0.15); color: var(--accent); }
-  .conn-panel { grid-column: 1 / -1; }
-  .conn-form { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
-  .field { display: flex; flex-direction: column; gap: 5px; }
-  .field label { font-size: 11px; color: var(--muted); font-weight: 500; }
-  .field input {
-    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
-    padding: 8px 12px; border-radius: 8px; font-size: 13px; width: 260px; outline: none;
-  }
-  .field input.token-field { width: 340px; }
-  .btn { padding: 9px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; }
-  .btn-primary { background: var(--accent); color: white; }
-  .btn-danger { background: rgba(231,76,60,0.15); color: var(--red); border: 1px solid rgba(231,76,60,0.3); }
-  .conn-status { margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 12px; }
-  .conn-status.ok { background: rgba(46,204,113,0.1); color: var(--green); border: 1px solid rgba(46,204,113,0.2); }
-  .conn-status.err { background: rgba(231,76,60,0.1); color: var(--red); border: 1px solid rgba(231,76,60,0.2); }
-  .conn-status.info { background: rgba(79,142,247,0.1); color: var(--accent); border: 1px solid rgba(79,142,247,0.2); }
-  .activity { grid-column: 1 / 3; }
-  #feed { max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
-  .feed-item { display: flex; gap: 10px; padding: 10px 12px; background: var(--surface2); border-radius: 8px; border-left: 3px solid transparent; font-size: 12px; }
-  .feed-item.system { border-left-color: var(--accent); }
-  .feed-item.error { border-left-color: var(--red); }
-  .feed-item.success { border-left-color: var(--green); }
-  .feed-item.warn { border-left-color: var(--yellow); }
-  .feed-time { color: var(--muted); min-width: 50px; font-family: monospace; }
-  .feed-msg { color: var(--text); flex: 1; }
-  .chat-panel { grid-column: 3; grid-row: 2 / 4; display: flex; flex-direction: column; }
-  .chat-messages { flex: 1; max-height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
-  .msg { padding: 10px 13px; border-radius: 10px; font-size: 13px; line-height: 1.5; max-width: 90%; }
-  .msg.user { background: var(--accent); color: white; align-self: flex-end; }
-  .msg.pam { background: var(--surface2); color: var(--text); align-self: flex-start; }
-  .msg.pam .sender { font-size: 10px; color: var(--accent); font-weight: 700; margin-bottom: 4px; }
-  .chat-input-wrap { display: flex; gap: 8px; }
-  .chat-input-wrap textarea {
-    flex: 1; background: var(--surface2); border: 1px solid var(--border); color: var(--text);
-    padding: 10px 12px; border-radius: 8px; font-size: 13px; resize: none; height: 64px; outline: none; font-family: var(--font);
-  }
-  .btn-send { width: 48px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; }
-  .agents-panel { grid-column: 1 / 3; }
-  .agents-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .agent-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 6px; }
-  .agent-card .name { font-size: 13px; font-weight: 700; }
-  .agent-card .role { font-size: 11px; color: var(--muted); }
-  .agent-card .status-row { display: flex; align-items: center; gap: 5px; font-size: 11px; margin-top: 4px; }
-  .dot-sm { width: 6px; height: 6px; border-radius: 50%; }
-  .dot-green { background: var(--green); } .dot-yellow { background: var(--yellow); } .dot-gray { background: var(--muted); }
-  .sys-rows { display: flex; flex-direction: column; gap: 8px; }
-  .sys-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--surface2); border-radius: 8px; font-size: 12px; }
-  .sys-row .label { color: var(--muted); }
-  .sys-row .val { font-weight: 600; font-family: monospace; }
-  .sys-row .val.ok { color: var(--green); } .sys-row .val.warn { color: var(--yellow); }
-  .hb-rows { display: flex; flex-direction: column; gap: 8px; }
-  .hb-row { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; background: var(--surface2); border-radius: 8px; font-size: 12px; }
-  .hb-icon { font-size: 18px; }
-  .hb-info .hb-name { font-weight: 600; font-size: 13px; }
-  .hb-info .hb-time { color: var(--accent); font-family: monospace; font-size: 11px; margin-top: 2px; }
-  .hb-info .hb-desc { color: var(--muted); margin-top: 3px; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#07070f;color:#d0d0e8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* ── HEADER ── */
+.hdr{display:flex;justify-content:space-between;align-items:center;padding:12px 24px;background:#0d0d1a;border-bottom:1px solid #1c1c30;position:sticky;top:0;z-index:200}
+.hdr-left{display:flex;align-items:center;gap:10px}
+.logo-txt{font-size:16px;font-weight:700;color:#e0e0f8}
+.logo-sub{font-size:10px;color:#444;letter-spacing:1px;text-transform:uppercase}
+.hdr-right{display:flex;align-items:center;gap:16px}
+.conn-pill{display:flex;align-items:center;gap:6px;font-size:11px;color:#666;background:#111120;padding:4px 10px;border-radius:20px;border:1px solid #1c1c30}
+.dot{width:7px;height:7px;border-radius:50%;background:#444;transition:all .3s}
+.dot.on{background:#44dd88;box-shadow:0 0 7px #44dd88;animation:breathe 2.5s infinite}
+.dot.err{background:#ff5555;box-shadow:0 0 7px #ff5555}
+@keyframes breathe{0%,100%{opacity:1}50%{opacity:.45}}
+.clk{font-size:12px;color:#444;font-variant-numeric:tabular-nums}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:2px;padding:0 24px;background:#0a0a14;border-bottom:1px solid #161625}
+.tab{padding:10px 20px;font-size:12px;font-weight:600;color:#555;cursor:pointer;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;user-select:none}
+.tab:hover{color:#888}
+.tab.active{color:#7788ff;border-color:#7788ff}
+
+/* ── CONFIG BAR ── */
+.cfg{background:#09090f;border-bottom:1px solid #13131f;padding:8px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cfg-lbl{font-size:10px;color:#444;white-space:nowrap;letter-spacing:.5px}
+.cfg-in{background:#111120;border:1px solid #1e1e30;border-radius:5px;padding:5px 9px;color:#999;font-size:11px;outline:none;flex:1;min-width:120px;transition:border-color .2s}
+.cfg-in:focus{border-color:#5566ee}
+.cfg-in.sm{max-width:220px}
+.btn{padding:5px 14px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;border:none;transition:background .2s;white-space:nowrap}
+.btn-pri{background:#4455ee;color:#fff}.btn-pri:hover{background:#5566ff}
+.btn-sec{background:#161628;color:#777;border:1px solid #1e1e30}.btn-sec:hover{background:#1e1e38;color:#aaa}
+.btn-sm{padding:4px 10px;font-size:10px}
+.btn-red{background:#7f1d1d;color:#fca5a5}.btn-red:hover{background:#991b1b}
+
+/* ── PANEL LAYOUT ── */
+.view{display:none;padding:20px 24px}
+.view.active{display:block}
+
+/* ── SISTEMA VIEW ── */
+.agents-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:1100px){.agents-row{grid-template-columns:repeat(3,1fr)}}
+.acard{background:#0e0e1c;border:1px solid #1c1c2e;border-radius:12px;padding:16px 14px 12px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s}
+.acard:hover{transform:translateY(-2px)}
+.acard.live{border-color:#222242}
+.acard.dim{opacity:.4}
+.abar{position:absolute;top:0;left:0;right:0;height:3px}
+.acard.live .abar{background:linear-gradient(90deg,#5566ee,#aa55ff)}
+.ahead{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.aicon{font-size:26px}
+.apill{display:flex;align-items:center;gap:4px;background:#0a0a18;padding:3px 7px;border-radius:10px;font-size:10px}
+.pdot{width:5px;height:5px;border-radius:50%;background:#333}
+.pdot.on{background:#44dd88;box-shadow:0 0 5px #44dd88;animation:breathe 2.5s infinite}
+.plbl{color:#555}.plbl.on{color:#44dd88}
+.aname{font-size:14px;font-weight:700;color:#dde;margin-bottom:2px}
+.arole{font-size:10px;color:#555;margin-bottom:10px}
+.aact{font-size:11px;color:#666;line-height:1.4;min-height:30px;padding:7px 9px;background:#09091a;border-radius:5px;border-left:2px solid #1e1e30}
+.aact.live{border-color:#5566ee;color:#888}
+.afoot{display:flex;justify-content:space-between;margin-top:9px;padding-top:9px;border-top:1px solid #12121e;font-size:10px;color:#555}
+.afoot b{color:#777;font-weight:600}
+.soon{display:inline-block;margin-top:7px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#333;background:#111120;padding:2px 7px;border-radius:3px}
+
+.bottom-grid{display:grid;grid-template-columns:1fr 300px;gap:18px}
+@media(max-width:900px){.bottom-grid{grid-template-columns:1fr}}
+
+.feed-card{background:#0e0e1c;border:1px solid #1c1c2e;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.feed-hdr{display:flex;justify-content:space-between;align-items:center}
+.sec-lbl{font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:#444;margin-bottom:12px}
+.feed-list{display:flex;flex-direction:column;gap:5px;max-height:380px;overflow-y:auto}
+.feed-list::-webkit-scrollbar{width:3px}
+.feed-list::-webkit-scrollbar-thumb{background:#222238;border-radius:2px}
+.fi{display:flex;gap:9px;padding:8px 10px;background:#09091a;border-radius:7px;border-left:2px solid transparent;animation:slideIn .2s ease}
+.fi.fu{border-color:#44bb88}.fi.fp{border-color:#5566ee}.fi.fs{border-color:#ff8844}
+@keyframes slideIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.fi-t{font-size:10px;color:#444;white-space:nowrap;min-width:34px;margin-top:2px;font-variant-numeric:tabular-nums}
+.fi-b{flex:1;min-width:0}
+.fi-s{font-size:11px;font-weight:700;margin-bottom:1px}
+.fi-s.u{color:#44bb88}.fi-s.p{color:#7788ff}.fi-s.s{color:#ff9944}
+.fi-m{font-size:11px;color:#555;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.feed-empty{text-align:center;padding:30px 16px;color:#333;font-size:12px}
+
+.sidebar{display:flex;flex-direction:column;gap:14px}
+.panel{background:#0e0e1c;border:1px solid #1c1c2e;border-radius:12px;padding:16px}
+.cal-item{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid #12121e}
+.cal-item:last-child{border-bottom:none}
+.cal-t{font-size:11px;color:#5566ee;font-weight:600;min-width:36px;font-variant-numeric:tabular-nums}
+.cal-dot{width:6px;height:6px;border-radius:50%;margin-top:3px;flex-shrink:0}
+.cal-name{font-size:12px;color:#ccc}.cal-cat{font-size:10px;color:#555;margin-top:1px}
+.hb-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #12121e}
+.hb-row:last-child{border-bottom:none}
+.hb-name{font-size:12px;color:#bbb;margin-bottom:1px}.hb-desc{font-size:10px;color:#555}
+.hb-time{font-size:13px;font-weight:700;color:#5566ee;font-variant-numeric:tabular-nums}
+.hb-time.nxt{color:#44dd88}
+.sys-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #12121e;font-size:11px}
+.sys-row:last-child{border-bottom:none}
+.sys-k{color:#555}.sys-v{color:#777;font-weight:600}.sys-v.ok{color:#44dd88}
+
+/* ── PROYECTOS VIEW ── */
+.proy-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.proy-title{font-size:15px;font-weight:700;color:#e0e0f8;flex:1}
+.filter-btn{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #1e1e30;background:#0e0e1c;color:#666;transition:all .2s}
+.filter-btn.active{background:#5566ee;color:#fff;border-color:#5566ee}
+.sync-info{font-size:10px;color:#444;white-space:nowrap}
+.sync-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#444;margin-right:4px;vertical-align:middle}
+.sync-dot.ok{background:#44dd88}
+
+.kanban-wrap{overflow-x:auto;padding-bottom:12px}
+.kanban-wrap::-webkit-scrollbar{height:5px}
+.kanban-wrap::-webkit-scrollbar-track{background:#0d0d1a}
+.kanban-wrap::-webkit-scrollbar-thumb{background:#222240;border-radius:3px}
+.kanban{display:flex;gap:12px;min-width:max-content;align-items:flex-start}
+
+.k-col{width:200px;flex-shrink:0}
+.k-head{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px 8px 0 0;margin-bottom:8px}
+.k-head-name{font-size:11px;font-weight:700;color:#e0e0f8}
+.k-count{font-size:10px;font-weight:700;color:#fff;background:rgba(255,255,255,.15);padding:1px 7px;border-radius:10px}
+.k-cards{min-height:80px;display:flex;flex-direction:column;gap:8px}
+.k-cards.drag-over{background:rgba(85,102,238,.08);border-radius:8px;padding:4px}
+
+.kcard{background:#0e0e1c;border:1px solid #1c1c2e;border-radius:9px;padding:10px;cursor:grab;transition:transform .15s,border-color .15s,box-shadow .15s;position:relative;user-select:none}
+.kcard:hover{border-color:#2a2a50;box-shadow:0 4px 16px rgba(0,0,0,.4);transform:translateY(-1px)}
+.kcard.dragging{opacity:.5;transform:rotate(2deg);cursor:grabbing}
+.kcard-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;gap:4px}
+.kcard-flag{font-size:14px;line-height:1}
+.kcard-urgent{font-size:10px}
+.kcard-name{font-size:12px;font-weight:700;color:#dde;line-height:1.3;flex:1}
+.kcard-action{font-size:10px;color:#666;line-height:1.35;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.kcard-foot{display:flex;align-items:center;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:1px solid #12121e}
+.kcard-resp{font-size:10px;color:#5566ee;font-weight:600}
+.kcard-edit{font-size:10px;color:#333;cursor:pointer;padding:2px 6px;border-radius:4px;border:1px solid #1a1a2e;background:transparent;transition:all .2s}
+.kcard-edit:hover{color:#aaa;border-color:#333}
+.k-add{width:100%;padding:6px;border-radius:7px;border:1px dashed #1e1e30;background:transparent;color:#444;font-size:11px;cursor:pointer;transition:all .2s;margin-top:4px}
+.k-add:hover{border-color:#5566ee;color:#7788ff;background:rgba(85,102,238,.05)}
+
+/* ── MODAL ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#0e0e1c;border:1px solid #2a2a45;border-radius:14px;padding:24px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:15px;font-weight:700;color:#e0e0f8;margin-bottom:18px}
+.form-row{margin-bottom:14px}
+.form-lbl{font-size:11px;color:#666;margin-bottom:5px;display:block;letter-spacing:.3px}
+.form-in{width:100%;background:#111120;border:1px solid #1e1e30;border-radius:7px;padding:7px 10px;color:#ccc;font-size:12px;outline:none;transition:border-color .2s}
+.form-in:focus{border-color:#5566ee}
+.form-in.sel{cursor:pointer}
+textarea.form-in{resize:vertical;min-height:60px}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chk-row{display:flex;align-items:center;gap:8px;font-size:12px;color:#888;cursor:pointer}
+.chk-row input{accent-color:#5566ee;width:14px;height:14px;cursor:pointer}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #1a1a28}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:#0e0e1c;border:1px solid #2a2a45;border-radius:10px;padding:10px 16px;font-size:12px;color:#ccc;z-index:600;animation:toastIn .25s ease;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.toast.ok{border-color:#44dd88;color:#44dd88}
+.toast.err{border-color:#ff5555;color:#ff9999}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── CHAT VIEW ── */
+.chat-wrap{display:grid;grid-template-columns:1fr 340px;gap:20px}
+.chat-main{background:#0e0e1c;border:1px solid #1c1c2e;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.chat-msgs{flex:1;overflow-y:auto;max-height:500px;display:flex;flex-direction:column;gap:8px}
+.chat-msgs::-webkit-scrollbar{width:3px}
+.chat-msgs::-webkit-scrollbar-thumb{background:#222238;border-radius:2px}
+.chat-in-row{display:flex;gap:8px}
+.chat-input{flex:1;background:#111120;border:1px solid #1e1e30;border-radius:8px;padding:9px 12px;color:#ccc;font-size:13px;outline:none;resize:none;transition:border-color .2s;max-height:120px}
+.chat-input:focus{border-color:#5566ee}
+.chat-send{background:#4455ee;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:600;cursor:pointer;align-self:flex-end}
+.chat-send:hover{background:#5566ff}
+.cmsg{padding:9px 12px;border-radius:9px;font-size:12px;line-height:1.5;max-width:85%}
+.cmsg.pam{background:#111130;border:1px solid #1e1e40;color:#ccc;align-self:flex-start}
+.cmsg.pam .msender{font-size:10px;color:#7788ff;font-weight:700;margin-bottom:3px}
+.cmsg.user{background:#1a2a4a;border:1px solid #1e3060;color:#b0c4de;align-self:flex-end}
 </style>
 </head>
 <body>
-<header>
-  <div class="logo">
-    <div class="logo-icon">P</div>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-left">
+    <span style="font-size:24px">🦋</span>
     <div>
-      <h1>PAM — Centro de Operaciones</h1>
-      <div class="subtitle">Ágora Consultores · Sistema Multi-Agente</div>
+      <div class="logo-txt">PAM — Centro de Operaciones</div>
+      <div class="logo-sub">Ágora Consultores · Sistema Multi-Agente</div>
     </div>
   </div>
-  <div id="globalStatus" class="status-badge">
-    <div class="dot"></div>
-    <span id="gsTxt">Desconectado</span>
+  <div class="hdr-right">
+    <div class="conn-pill"><div class="dot" id="connDot"></div><span id="connLbl">Desconectado</span></div>
+    <div class="clk" id="clk">--:--:--</div>
   </div>
-</header>
-<div class="main">
-  <div class="card conn-panel">
-    <div class="card-header">
-      <span class="card-title">Conexión al Gateway</span>
-      <span class="card-badge badge-blue" id="wsState">Desconectado</span>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('sistema')">🖥 Sistema</div>
+  <div class="tab" onclick="switchTab('proyectos')">📋 Proyectos</div>
+  <div class="tab" onclick="switchTab('chat')">💬 Chat PAM</div>
+</div>
+
+<!-- CONFIG -->
+<div class="cfg">
+  <span class="cfg-lbl">GATEWAY</span>
+  <input class="cfg-in" id="cfgWs" type="text" placeholder="wss://tu-proxy.railway.app">
+  <span class="cfg-lbl">TOKEN</span>
+  <input class="cfg-in sm" id="cfgTok" type="text" placeholder="token del gateway">
+  <button class="btn btn-pri btn-sm" onclick="doConnect()">Conectar</button>
+  <button class="btn btn-sec btn-sm" onclick="doDisconnect()">Desconectar</button>
+  <span style="flex:1"></span>
+  <span class="cfg-lbl">GITHUB TOKEN</span>
+  <input class="cfg-in sm" id="cfgGh" type="text" placeholder="ghp_... (para guardar proyectos)">
+</div>
+
+<!-- ═══════════════════════════════ SISTEMA ═══════════════════════════════ -->
+<div class="view active" id="view-sistema">
+
+  <!-- AGENTS -->
+  <div class="sec-lbl">Agentes del sistema</div>
+  <div class="agents-row">
+    <div class="acard live">
+      <div class="abar"></div>
+      <div class="ahead"><div class="aicon">🦋</div>
+        <div class="apill"><div class="pdot" id="pamDot"></div><span class="plbl" id="pamLbl">Offline</span></div>
+      </div>
+      <div class="aname">PAM</div>
+      <div class="arole">Asistente Personal · Secretaria</div>
+      <div class="aact" id="pamAct">Esperando conexión...</div>
+      <div class="afoot">Msgs hoy: <b id="pamMsgs">0</b></div>
     </div>
-    <div class="conn-form">
-      <div class="field">
-        <label>WebSocket URL</label>
-        <input type="text" id="wsUrl" value="ws://37.27.212.69:18789" />
-      </div>
-      <div class="field">
-        <label>Token de Autenticación</label>
-        <input type="text" id="wsToken" class="token-field" placeholder="67276f1c466b237458534b5a..." />
-      </div>
-      <button class="btn btn-primary" onclick="connect()">Conectar</button>
-      <button class="btn btn-danger" onclick="disconnect()">Desconectar</button>
+    <div class="acard dim"><div class="abar"></div>
+      <div class="ahead"><div class="aicon">📋</div><div class="apill"><div class="pdot"></div><span class="plbl">Offline</span></div></div>
+      <div class="aname">Operador</div><div class="arole">Gestión de proyectos</div>
+      <div class="aact">Sin configurar</div><div class="soon">Próximamente</div>
     </div>
-    <div id="connStatus" class="conn-status info" style="display:none"></div>
-  </div>
-  <div class="card activity">
-    <div class="card-header">
-      <span class="card-title">Feed de Actividad</span>
-      <div style="display:flex;gap:8px;align-items:center">
-        <span class="card-badge badge-green" id="feedCount">0 eventos</span>
-        <button class="btn btn-danger" style="padding:4px 10px;font-size:11px" onclick="clearFeed()">Limpiar</button>
-      </div>
+    <div class="acard dim"><div class="abar"></div>
+      <div class="ahead"><div class="aicon">💻</div><div class="apill"><div class="pdot"></div><span class="plbl">Offline</span></div></div>
+      <div class="aname">Programador</div><div class="arole">Desarrollo · Automatizaciones</div>
+      <div class="aact">Sin configurar</div><div class="soon">Próximamente</div>
     </div>
-    <div id="feed">
-      <div class="feed-item system">
-        <span class="feed-time">--:--</span>
-        <span class="feed-msg">Dashboard iniciado. Conectá el gateway para comenzar.</span>
-      </div>
+    <div class="acard dim"><div class="abar"></div>
+      <div class="ahead"><div class="aicon">🧠</div><div class="apill"><div class="pdot"></div><span class="plbl">Offline</span></div></div>
+      <div class="aname">Pensador</div><div class="arole">Análisis estratégico</div>
+      <div class="aact">Sin configurar</div><div class="soon">Próximamente</div>
     </div>
-  </div>
-  <div class="card chat-panel">
-    <div class="card-header">
-      <span class="card-title">Chat con PAM</span>
-      <span class="card-badge badge-green">Listo</span>
-    </div>
-    <div class="chat-messages" id="chatMessages">
-      <div class="msg pam">
-        <div class="sender">PAM</div>
-        Buenos días, Diego. Conectá el gateway y empezamos.
-      </div>
-    </div>
-    <div class="chat-input-wrap">
-      <textarea id="chatInput" placeholder="Escribí un mensaje para PAM..." onkeydown="handleKey(event)"></textarea>
-      <button class="btn-send" onclick="sendMsg()">↑</button>
-    </div>
-  </div>
-  <div class="card agents-panel">
-    <div class="card-header">
-      <span class="card-title">Agentes del Sistema</span>
-      <span class="card-badge badge-yellow">6 agentes</span>
-    </div>
-    <div class="agents-grid">
-      <div class="agent-card">
-        <div class="name">PAM Asistente</div><div class="role">Core · Asistente Personal</div>
-        <div class="status-row"><div class="dot-sm dot-green"></div><span style="color:var(--green)">Activo</span></div>
-      </div>
-      <div class="agent-card">
-        <div class="name">PAM Cuanti</div><div class="role">Ponderación de muestras</div>
-        <div class="status-row"><div class="dot-sm dot-yellow"></div><span style="color:var(--yellow)">En integración</span></div>
-      </div>
-      <div class="agent-card">
-        <div class="name">OAK</div><div class="role">Análisis cualitativo</div>
-        <div class="status-row"><div class="dot-sm dot-yellow"></div><span style="color:var(--yellow)">En integración</span></div>
-      </div>
-      <div class="agent-card">
-        <div class="name">Graficador</div><div class="role">Pre-informe PPTX automático</div>
-        <div class="status-row"><div class="dot-sm dot-yellow"></div><span style="color:var(--yellow)">En integración</span></div>
-      </div>
-      <div class="agent-card">
-        <div class="name">Corrector</div><div class="role">Auditoría de informes</div>
-        <div class="status-row"><div class="dot-sm dot-yellow"></div><span style="color:var(--yellow)">En integración</span></div>
-      </div>
-      <div class="agent-card">
-        <div class="name">Agente Operador</div><div class="role">Automatización de tareas</div>
-        <div class="status-row"><div class="dot-sm dot-gray"></div><span style="color:var(--muted)">En diseño</span></div>
-      </div>
+    <div class="acard dim"><div class="abar"></div>
+      <div class="ahead"><div class="aicon">⚙️</div><div class="apill"><div class="pdot"></div><span class="plbl">Offline</span></div></div>
+      <div class="aname">Trabajador</div><div class="arole">Tareas automáticas</div>
+      <div class="aact">Sin configurar</div><div class="soon">Próximamente</div>
     </div>
   </div>
-  <div class="card">
-    <div class="card-header"><span class="card-title">Estado del Sistema</span><span class="card-badge badge-green">Online</span></div>
-    <div class="sys-rows">
-      <div class="sys-row"><span class="label">Gateway WebSocket</span><span class="val ok">37.27.212.69:18789</span></div>
-      <div class="sys-row"><span class="label">Telegram Bot</span><span class="val ok">@pamoficina_bot</span></div>
-      <div class="sys-row"><span class="label">Gmail</span><span class="val warn">Pendiente OAuth</span></div>
-      <div class="sys-row"><span class="label">Google Calendar</span><span class="val warn">Pendiente skill</span></div>
-      <div class="sys-row"><span class="label">Servidor</span><span class="val ok">Hetzner · 37.27.212.69</span></div>
-      <div class="sys-row"><span class="label">Mensajes recibidos</span><span class="val" id="msgCount">0</span></div>
+
+  <!-- BOTTOM -->
+  <div class="bottom-grid">
+    <div class="feed-card">
+      <div class="feed-hdr">
+        <div class="sec-lbl" style="margin:0">Actividad en tiempo real</div>
+        <span style="font-size:11px;color:#444;background:#111120;padding:2px 8px;border-radius:10px" id="feedCnt">0 eventos</span>
+      </div>
+      <div class="feed-list" id="feedList">
+        <div class="feed-empty">📡 Conectate al gateway para ver actividad en tiempo real</div>
+      </div>
     </div>
-  </div>
-  <div class="card">
-    <div class="card-header"><span class="card-title">Rutinas Automáticas</span><span class="card-badge badge-blue">Lun–Vie</span></div>
-    <div class="hb-rows">
-      <div class="hb-row">
-        <div class="hb-icon">🌅</div>
-        <div class="hb-info"><div class="hb-name">Arranque del día</div><div class="hb-time">08:00</div><div class="hb-desc">Resumen de emails, calendario y pendientes</div></div>
+    <div class="sidebar">
+      <div class="panel">
+        <div class="sec-lbl">Calendario — hoy</div>
+        <div id="calList"><div style="text-align:center;padding:16px;color:#333;font-size:12px">Sin eventos cargados</div></div>
+        <button class="btn btn-sec btn-sm" style="width:100%;margin-top:10px;font-size:10px" onclick="askPamCal()">Pedirle a PAM los eventos de hoy</button>
       </div>
-      <div class="hb-row">
-        <div class="hb-icon">☀️</div>
-        <div class="hb-info"><div class="hb-name">Check de mediodía</div><div class="hb-time">13:00</div><div class="hb-desc">Estado de proyectos activos y novedades</div></div>
+      <div class="panel">
+        <div class="sec-lbl">Rutinas automáticas</div>
+        <div class="hb-row"><div><div class="hb-name">☀️ Arranque del día</div><div class="hb-desc">Resumen + prioridades</div></div><div class="hb-time" id="hb1">08:00</div></div>
+        <div class="hb-row"><div><div class="hb-name">🔄 Check mediodía</div><div class="hb-desc">Seguimiento de tareas</div></div><div class="hb-time" id="hb2">13:00</div></div>
+        <div class="hb-row"><div><div class="hb-name">🌙 Cierre de jornada</div><div class="hb-desc">Pendientes para mañana</div></div><div class="hb-time" id="hb3">17:30</div></div>
       </div>
-      <div class="hb-row">
-        <div class="hb-icon">🌙</div>
-        <div class="hb-info"><div class="hb-name">Cierre de jornada</div><div class="hb-time">17:30</div><div class="hb-desc">Resumen del día y tareas para mañana</div></div>
+      <div class="panel">
+        <div class="sec-lbl">Estado del sistema</div>
+        <div class="sys-row"><span class="sys-k">Gateway OpenClaw</span><span class="sys-v ok" id="sysGw">—</span></div>
+        <div class="sys-row"><span class="sys-k">Telegram</span><span class="sys-v ok">@pamoficina_bot</span></div>
+        <div class="sys-row"><span class="sys-k">Google Workspace</span><span class="sys-v ok">Conectado</span></div>
+        <div class="sys-row"><span class="sys-k">Servidor</span><span class="sys-v ok">Hetzner · Helsinki</span></div>
+        <div class="sys-row"><span class="sys-k">OpenClaw</span><span class="sys-v">2026.3.13</span></div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- ═══════════════════════════════ PROYECTOS ═══════════════════════════════ -->
+<div class="view" id="view-proyectos">
+  <div class="proy-toolbar">
+    <span class="proy-title">📋 Tablero de Proyectos — Ágora</span>
+    <button class="filter-btn active" onclick="setFilter('all',this)">Todos</button>
+    <button class="filter-btn" onclick="setFilter('argentina',this)">🇦🇷 Argentina</button>
+    <button class="filter-btn" onclick="setFilter('latam',this)">🌎 LATAM</button>
+    <button class="filter-btn" onclick="setFilter('urgent',this)">🔥 Urgentes</button>
+    <button class="btn btn-pri btn-sm" onclick="openModal(null,null)">+ Nuevo proyecto</button>
+    <button class="btn btn-sec btn-sm" onclick="syncProyectos()">↻ Sincronizar</button>
+    <span class="sync-info"><span class="sync-dot" id="syncDot"></span><span id="syncTxt">Sin sincronizar</span></span>
+  </div>
+  <div class="kanban-wrap">
+    <div class="kanban" id="kanban"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ CHAT ═══════════════════════════════ -->
+<div class="view" id="view-chat">
+  <div class="chat-wrap">
+    <div class="chat-main">
+      <div class="sec-lbl">Chat con PAM</div>
+      <div class="chat-msgs" id="chatMsgs">
+        <div class="cmsg pam"><div class="msender">🦋 PAM</div>Buenos días, Diego. Conectá el gateway y empezamos.</div>
+      </div>
+      <div class="chat-in-row">
+        <textarea class="chat-input" id="chatIn" placeholder="Escribí un mensaje para PAM..." rows="2" onkeydown="chatKey(event)"></textarea>
+        <button class="chat-send" onclick="sendChatMsg()">Enviar</button>
+      </div>
+    </div>
+    <div class="sidebar">
+      <div class="panel">
+        <div class="sec-lbl">Comandos rápidos para PAM</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button class="btn btn-sec btn-sm" style="text-align:left" onclick="quickCmd('¿Cuál es el estado del proyecto Uruguay?')">📊 Estado Uruguay</button>
+          <button class="btn btn-sec btn-sm" style="text-align:left" onclick="quickCmd('Listá todos los proyectos urgentes ahora mismo')">🔥 Proyectos urgentes</button>
+          <button class="btn btn-sec btn-sm" style="text-align:left" onclick="quickCmd('¿Qué tengo pendiente hacer hoy?')">✅ Pendientes de hoy</button>
+          <button class="btn btn-sec btn-sm" style="text-align:left" onclick="quickCmd('Listá los eventos de Google Calendar de hoy')">📅 Agenda de hoy</button>
+          <button class="btn btn-sec btn-sm" style="text-align:left" onclick="quickCmd('Dame un resumen del estado general de todos los proyectos')">📋 Resumen general</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="sec-lbl">Comandos de proyectos</div>
+        <div style="font-size:11px;color:#555;line-height:1.8">
+          <div style="color:#888;margin-bottom:6px">Podés decirle a PAM:</div>
+          <div>• "Mové <b style='color:#7788ff'>Uruguay</b> a Entrega"</div>
+          <div>• "Agregá proyecto <b style='color:#7788ff'>X</b> en etapa Venta"</div>
+          <div>• "Marcá <b style='color:#7788ff'>Bariloche</b> como urgente"</div>
+          <div>• "Asigná <b style='color:#7788ff'>Esteban</b> a Uruguay"</div>
+          <div>• "Estado de proyectos en Campo"</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR/CREAR PROYECTO -->
+<div class="modal-bg" id="modalBg" onclick="closeModalBg(event)">
+  <div class="modal">
+    <h3 id="modalTitle">Nuevo proyecto</h3>
+    <div class="form-row-2">
+      <div class="form-row" style="margin:0">
+        <label class="form-lbl">Nombre del proyecto</label>
+        <input class="form-in" id="fNombre" type="text" placeholder="Ej: Buenos Aires">
+      </div>
+      <div class="form-row" style="margin:0">
+        <label class="form-lbl">Región</label>
+        <select class="form-in sel" id="fRegion">
+          <option value="argentina">🇦🇷 Argentina</option>
+          <option value="latam">🌎 LATAM / Internacional</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row" style="margin-top:12px">
+      <label class="form-lbl">Etapa actual</label>
+      <select class="form-in sel" id="fEtapa"></select>
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">Próxima acción</label>
+      <input class="form-in" id="fAccion" type="text" placeholder="Ej: Enviar presupuesto al cliente">
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">Responsable</label>
+      <input class="form-in" id="fResp" type="text" placeholder="Ej: Diego / Esteban / Manu">
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">Notas</label>
+      <textarea class="form-in" id="fNotas" placeholder="Contexto adicional..."></textarea>
+    </div>
+    <label class="chk-row form-row">
+      <input type="checkbox" id="fUrgente"> Marcar como urgente 🔥
+    </label>
+    <div class="modal-footer">
+      <button class="btn btn-red btn-sm" id="btnEliminar" onclick="deleteProject()" style="display:none">Eliminar</button>
+      <button class="btn btn-sec" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-pri" onclick="saveProject()">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <script>
-  var ws = null, msgCount = 0, feedItems = 0, authOk = false;
+// ══════════════════════════════════════════════════
+// CONFIG & STATE
+// ══════════════════════════════════════════════════
+const GH_OWNER = 'diegoxvillanueva-collab';
+const GH_REPO  = 'pam-proxy';
+const GH_FILE  = 'proyectos.json';
 
-  /* ── helpers ── */
-  function genId() {
-    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, function(c) {
-      return (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c/4).toString(16);
-    });
-  }
-  function ts() {
-    var d = new Date();
-    return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
-  }
-  function addFeed(msg, type) {
-    var feed = document.getElementById('feed'), item = document.createElement('div');
-    item.className = 'feed-item ' + (type||'system');
-    item.innerHTML = "<span class='feed-time'>" + ts() + "</span><span class='feed-msg'>" + msg + "</span>";
-    feed.insertBefore(item, feed.firstChild);
-    if (feed.children.length > 100) feed.removeChild(feed.lastChild);
-    feedItems++;
-    document.getElementById('feedCount').textContent = feedItems + ' eventos';
-  }
-  function clearFeed() {
-    document.getElementById('feed').innerHTML = '';
-    feedItems = 0;
-    document.getElementById('feedCount').textContent = '0 eventos';
-  }
-  function showConn(msg, type) {
-    var el = document.getElementById('connStatus');
-    el.style.display = 'block'; el.className = 'conn-status ' + type; el.textContent = msg;
-  }
-  function setConnected(yes) {
-    if (yes) {
-      document.getElementById('wsState').textContent = 'Conectado';
-      document.getElementById('wsState').style.background = 'rgba(46,204,113,0.15)';
-      document.getElementById('wsState').style.color = 'var(--green)';
-      document.getElementById('gsTxt').textContent = 'Conectado';
-    } else {
-      document.getElementById('wsState').textContent = 'Desconectado';
-      document.getElementById('wsState').style.background = '';
-      document.getElementById('wsState').style.color = '';
-      document.getElementById('gsTxt').textContent = 'Desconectado';
+let ws = null, feedCount = 0, msgCount = 0, reconnTmr = null;
+let proyData = null, currentFilter = 'all', editingId = null, editingStage = null;
+let ghFileSha = null;
+
+// ── LOAD CONFIG ──
+(function(){
+  const s = k => localStorage.getItem(k)||'';
+  ['cfgWs','cfgTok','cfgGh'].forEach(id => { const v=s('pam_'+id); if(v) document.getElementById(id).value=v; });
+  const ws=s('pam_cfgWs'), tok=s('pam_cfgTok');
+  if(ws&&tok) setTimeout(doConnect,700);
+})();
+
+// ── CLOCK ──
+function tick(){
+  const n=new Date();
+  document.getElementById('clk').textContent=n.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const m=n.getHours()*60+n.getMinutes();
+  [{id:'hb1',s:480},{id:'hb2',s:780},{id:'hb3',s:1050}].forEach(b=>{
+    document.getElementById(b.id).classList.toggle('nxt',m>=b.s-30&&m<b.s+5);
+  });
+}
+setInterval(tick,1000); tick();
+
+// ── TABS ──
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach((el,i)=>{
+    const names=['sistema','proyectos','chat'];
+    el.classList.toggle('active',names[i]===t);
+  });
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+t).classList.add('active');
+  if(t==='proyectos'&&!proyData) syncProyectos();
+}
+
+// ══════════════════════════════════════════════════
+// WEBSOCKET
+// ══════════════════════════════════════════════════
+function setConn(state){
+  const d=document.getElementById('connDot'), l=document.getElementById('connLbl');
+  const pd=document.getElementById('pamDot'), pl=document.getElementById('pamLbl');
+  d.className='dot '+(state==='on'?'on':state==='err'?'err':'');
+  l.textContent=state==='on'?'Conectado':state==='err'?'Error':'Desconectado';
+  pd.className='pdot '+(state==='on'?'on':'');
+  pl.className='plbl '+(state==='on'?'on':'');
+  pl.textContent=state==='on'?'Activa':'Offline';
+  document.getElementById('sysGw').textContent=state==='on'?'Activo':'—';
+}
+
+function doConnect(){
+  const url=document.getElementById('cfgWs').value.trim();
+  const tok=document.getElementById('cfgTok').value.trim();
+  if(!url){alert('Ingresá la URL del gateway');return;}
+  ['cfgWs','cfgTok','cfgGh'].forEach(id=>localStorage.setItem('pam_'+id,document.getElementById(id).value.trim()));
+  if(ws){ws.close();ws=null;}
+  if(reconnTmr){clearTimeout(reconnTmr);reconnTmr=null;}
+  addFeed('s','🔌 Conectando a '+url+'...');
+  try{ ws=new WebSocket(url); }catch(e){addFeed('s','❌ URL inválida: '+e.message);return;}
+  ws.onopen=()=>{ addFeed('s','Socket abierto — esperando challenge del gateway...'); };
+  ws.onmessage=ev=>{
+    try{
+      const d=JSON.parse(ev.data);
+      if(d.type==='event'&&d.event==='connect.challenge'){
+        addFeed('s','→ Respondiendo connect.challenge con req/connect...');
+        const id=crypto.randomUUID?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&0x3|0x8)).toString(16)});
+        ws.send(JSON.stringify({type:'req',id,method:'connect',params:{minProtocol:3,maxProtocol:3,client:{id:'openclaw-control-ui',name:'PAM Dashboard',version:'1.0.0'},role:'operator',scopes:['operator.admin','operator.read','operator.write'],auth:{token:tok||'',deviceToken:'',password:''}}}));
+        return;
+      }
+      if((d.type==='res'&&d.result?.ok)||(d.type==='event'&&d.event==='auth.ok')){
+        setConn('on');
+        addFeed('s','✅ Autenticado correctamente');
+        document.getElementById('pamAct').textContent='Online — escuchando mensajes';
+        document.getElementById('pamAct').classList.add('live');
+        return;
+      }
+      handleEvent(d);
+    }catch(_){
+      if(ev.data&&!ev.data.includes('ping'))addFeed('s',ev.data.substring(0,120));
     }
-  }
-  function appendChat(who, text) {
-    var msgs = document.getElementById('chatMessages'), d = document.createElement('div');
-    d.className = 'msg ' + who;
-    if (who === 'pam') d.innerHTML = "<div class='sender'>PAM</div>" + String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;');
-    else d.textContent = text;
-    msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight;
-  }
+  };
+  ws.onerror=()=>{setConn('err');addFeed('s','⚠️ Error de WebSocket');};
+  ws.onclose=ev=>{
+    setConn('');
+    if(ev.code!==1000){
+      addFeed('s','🔄 Cerrado ('+ev.code+'). Reconectando en 12s...');
+      reconnTmr=setTimeout(doConnect,12000);
+    }else addFeed('s','🔌 Desconectado');
+  };
+}
 
-  /* ── OpenClaw protocol helpers ── */
-  function sendReq(method, params) {
-    if (!ws || ws.readyState !== 1) return null;
-    var id = genId();
-    ws.send(JSON.stringify({ type: 'req', id: id, method: method, params: params }));
-    return id;
-  }
+function doDisconnect(){
+  if(reconnTmr){clearTimeout(reconnTmr);reconnTmr=null;}
+  if(ws){ws.close(1000);ws=null;}
+  setConn('');
+}
 
-  // Called after receiving connect.challenge — sends the proper connect req
-  function sendConnect(nonce, token) {
-    addFeed('\u2192 Respondiendo connect.challenge con req/connect...', 'system');
-    sendReq('connect', {
-      minProtocol: 3,
-      maxProtocol: 3,
-      client: {
-        id: 'openclaw-control-ui',
-        version: 'control-ui',
-        platform: 'web',
-        mode: 'webchat',
-        instanceId: genId()
-      },
-      role: 'operator',
-      scopes: ['operator.admin', 'operator.approvals', 'operator.pairing'],
-      caps: ['tool-events'],
-      auth: { token: token || "", deviceToken: "", password: "" },
-      userAgent: navigator.userAgent,
-      locale: navigator.language
-    });
-  }
-
-  /* ── main connect ── */
-  function connect() {
-    var url   = document.getElementById('wsUrl').value.trim();
-    var token = document.getElementById('wsToken').value.trim();
-    if (!url) { showConn('Ingres\u00e1 la URL', 'err'); return; }
-    if (ws) { ws.close(); ws = null; }
-    authOk = false;
-    showConn('Conectando a ' + url + '...', 'info');
-    addFeed('Intentando conexi\u00f3n a ' + url, 'system');
-    document.getElementById('wsState').textContent = 'Conectando...';
-
-    ws = new WebSocket(url);
-
-    ws.onopen = function() {
-      addFeed('Socket abierto \u2014 esperando challenge del gateway...', 'system');
-    };
-
-    ws.onmessage = function(ev) {
-      var data;
-      try { data = JSON.parse(ev.data); }
-      catch (_) {
-        if (ev.data && !ev.data.includes('ping'))
-          addFeed('No-JSON: ' + String(ev.data).substring(0, 80), 'warn');
-        return;
-      }
-
-      // ── Gateway event ──
-      if (data.type === 'event') {
-
-        // connect.challenge → respond with req/connect
-        if (data.event === 'connect.challenge') {
-          var nonce = (data.payload && data.payload.nonce) || '';
-          addFeed('\u2190 connect.challenge (nonce: ' + nonce.substring(0, 8) + '...)', 'system');
-          sendConnect(nonce, token);
-          return;
-        }
-
-        // connected / auth.ok (some versions)
-        if (data.event === 'auth.ok' || data.event === 'connected') {
-          if (!authOk) {
-            authOk = true; setConnected(true);
-            showConn('\u2705 Autenticado y conectado', 'ok');
-            addFeed('\u2705 Gateway conectado', 'success');
-          }
-          return;
-        }
-
-        // All other events
-        msgCount++; document.getElementById('msgCount').textContent = msgCount;
-        var preview = data.payload ? JSON.stringify(data.payload).substring(0, 100) : '';
-        addFeed('\u2190 [' + (data.event||'?') + '] ' + preview, 'success');
-
-        // Chat streaming
-        if (data.event === 'chat' && data.payload) {
-          var pl = data.payload;
-          if (pl.state === 'final' || pl.state === 'delta') {
-            var m = pl.message, txt = null;
-            if (m && Array.isArray(m.content)) {
-              for (var i = 0; i < m.content.length; i++)
-                if (m.content[i].type === 'text') { txt = m.content[i].text; break; }
-            } else if (m && typeof m.text === 'string') { txt = m.text; }
-            if (txt && pl.state === 'final') appendChat('pam', txt);
-          }
-        }
-        return;
-      }
-
-      // ── Response to our req ──
-      if (data.type === 'res') {
-        if (data.ok && !authOk) {
-          authOk = true; setConnected(true);
-          showConn('\u2705 Autenticado correctamente', 'ok');
-          addFeed('\u2705 Connect OK \u2014 gateway listo', 'success');
-        } else if (!data.ok) {
-          var errCode = (data.error && data.error.code)    || '';
-          var errMsg  = (data.error && data.error.message) || 'error';
-          addFeed('\u2717 Error [' + errCode + ']: ' + errMsg, 'error');
-          showConn('\u2717 ' + errMsg, 'err');
-        }
-        return;
-      }
-    };
-
-    ws.onerror = function() {
-      addFeed('Error WebSocket', 'error');
-      showConn('\u2717 Error al conectar. Verific\u00e1 la URL.', 'err');
-    };
-
-    ws.onclose = function(ev) {
-      setConnected(false); authOk = false;
-      addFeed('WebSocket cerrado (c\u00f3digo ' + ev.code + (ev.reason ? ' \u2014 ' + ev.reason : '') + ')', 'warn');
-      ws = null;
-    };
-  }
-
-  function disconnect() {
-    if (ws) { ws.close(1000, 'Manual'); ws = null; }
-    addFeed('Desconexi\u00f3n manual', 'warn');
-  }
-
-  /* ── chat ── */
-  function sendMsg() {
-    var ta = document.getElementById('chatInput'), msg = ta.value.trim();
-    if (!msg) return;
-    appendChat('user', msg); ta.value = '';
-    addFeed('\u2192 ' + msg.substring(0, 60), 'system');
-    if (!authOk) {
-      setTimeout(function() { appendChat('pam', 'No estoy conectado al gateway. Conect\u00e1 primero.'); }, 300);
-      return;
+function handleEvent(d){
+  const raw=JSON.stringify(d);
+  if(d.type==='ping'||d.type==='pong'||raw.includes('"heartbeat"'))return;
+  if(d.type==='message'||d.role!==undefined){
+    const isU=d.role==='user'||d.from==='user';
+    const cnt=d.content||d.message||d.text||'';
+    if(!cnt)return;
+    addFeed(isU?'u':'p',(isU?'👤 Diego':'🦋 PAM')+': '+cnt);
+    if(!isU){
+      const prev=cnt.length>80?cnt.substring(0,80)+'…':cnt;
+      document.getElementById('pamAct').textContent=prev;
+      msgCount++; document.getElementById('pamMsgs').textContent=msgCount;
+      addChatMsg('pam',cnt);
+    } else addChatMsg('user',cnt);
+    // Check if PAM updated proyectos
+    if(!isU&&(cnt.includes('proyectos.json')||cnt.includes('actualicé el proyecto')||cnt.includes('moví'))){
+      setTimeout(syncProyectos,2000);
     }
-    sendReq('chat.send', { sessionKey: 'main', message: msg, deliver: false, idempotencyKey: genId() });
+    return;
   }
-  function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } }
+  if(d.type==='tool_call'||d.tool){
+    const t=d.tool||d.name||'?';
+    addFeed('p','🔧 PAM usa: '+t);
+    document.getElementById('pamAct').textContent='Herramienta: '+t+'…';
+    return;
+  }
+  if(raw.length>8) addFeed('s',raw.substring(0,120));
+}
 
-  addFeed('PAM Dashboard cargado \u00b7 ' + new Date().toLocaleDateString('es-AR'), 'system');
+// ── FEED ──
+function addFeed(type,msg){
+  const list=document.getElementById('feedList');
+  const empty=list.querySelector('.feed-empty');
+  if(empty)empty.remove();
+  feedCount++;
+  document.getElementById('feedCnt').textContent=feedCount+(feedCount===1?' evento':' eventos');
+  const t=new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+  const tc=type==='u'?'u':type==='p'?'p':'s';
+  const sn=type==='u'?'Diego':type==='p'?'PAM':'Sistema';
+  const el=document.createElement('div');
+  el.className='fi f'+tc;
+  el.innerHTML='<div class="fi-t">'+t+'</div><div class="fi-b"><div class="fi-s '+tc+'">'+sn+'</div><div class="fi-m">'+esc(msg)+'</div></div>';
+  list.insertBefore(el,list.firstChild);
+  while(list.children.length>80)list.removeChild(list.lastChild);
+}
+
+// ── CHAT ──
+function addChatMsg(who,text){
+  const msgs=document.getElementById('chatMsgs');
+  const el=document.createElement('div');
+  el.className='cmsg '+who;
+  if(who==='pam')el.innerHTML='<div class="msender">🦋 PAM</div>'+esc(text).replace(/\n/g,'<br>');
+  else el.textContent=text;
+  msgs.appendChild(el);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+function chatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatMsg();}}
+
+function sendChatMsg(){
+  const inp=document.getElementById('chatIn');
+  const txt=inp.value.trim();
+  if(!txt)return;
+  if(!ws||ws.readyState!==1){showToast('Conectate al gateway primero','err');return;}
+  addChatMsg('user',txt);
+  inp.value='';
+  try{
+    ws.send(JSON.stringify({type:'message',role:'user',content:txt}));
+  }catch(e){showToast('Error al enviar: '+e.message,'err');}
+}
+
+function quickCmd(cmd){
+  document.getElementById('chatIn').value=cmd;
+  switchTab('chat');
+}
+
+function askPamCal(){
+  if(!ws||ws.readyState!==1){showToast('Conectate al gateway primero','err');return;}
+  try{
+    ws.send(JSON.stringify({type:'message',role:'user',content:'Listá mis eventos de Google Calendar de hoy en formato JSON con campos: title, start, calendar'}));
+    addFeed('u','👤 [Solicitando calendario…]');
+  }catch(e){showToast('Error: '+e.message,'err');}
+}
+
+// ══════════════════════════════════════════════════
+// PROYECTOS / GITHUB API
+// ══════════════════════════════════════════════════
+function ghToken(){return document.getElementById('cfgGh').value.trim();}
+
+async function syncProyectos(){
+  document.getElementById('syncTxt').textContent='Sincronizando...';
+  document.getElementById('syncDot').classList.remove('ok');
+  try{
+    const tok=ghToken();
+    const headers={'Accept':'application/vnd.github.v3+json'};
+    if(tok)headers['Authorization']='token '+tok;
+    const r=await fetch('https://api.github.com/repos/'+GH_OWNER+'/'+GH_REPO+'/contents/'+GH_FILE,{headers});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const j=await r.json();
+    ghFileSha=j.sha;
+    proyData=JSON.parse(atob(j.content.replace(/\n/g,'')));
+    renderKanban();
+    const t=new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('syncTxt').textContent='Actualizado '+t;
+    document.getElementById('syncDot').classList.add('ok');
+  }catch(e){
+    document.getElementById('syncTxt').textContent='Error: '+e.message;
+    showToast('No se pudo cargar proyectos.json — verificá el GitHub Token','err');
+  }
+}
+
+async function saveToGithub(){
+  const tok=ghToken();
+  if(!tok){showToast('Necesitás un GitHub Token para guardar cambios','err');return false;}
+  if(!proyData)return false;
+  try{
+    proyData.lastUpdated=new Date().toISOString();
+    proyData.updatedBy='Dashboard';
+    const content=btoa(unescape(encodeURIComponent(JSON.stringify(proyData,null,2))));
+    const body={message:'Dashboard: actualizar proyectos.json',content,sha:ghFileSha};
+    const r=await fetch('https://api.github.com/repos/'+GH_OWNER+'/'+GH_REPO+'/contents/'+GH_FILE,{
+      method:'PUT',headers:{'Authorization':'token '+tok,'Content-Type':'application/json'},
+      body:JSON.stringify(body)
+    });
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const j=await r.json();
+    ghFileSha=j.content.sha;
+    showToast('✅ Guardado en GitHub','ok');
+    return true;
+  }catch(e){
+    showToast('Error al guardar: '+e.message,'err');
+    return false;
+  }
+}
+
+// ── KANBAN RENDER ──
+function renderKanban(){
+  if(!proyData)return;
+  const kb=document.getElementById('kanban');
+  kb.innerHTML='';
+  const filtered=proyData.projects.filter(p=>{
+    if(currentFilter==='all')return true;
+    if(currentFilter==='urgent')return p.urgent;
+    return p.region===currentFilter;
+  });
+  proyData.stages.forEach(stage=>{
+    const cards=filtered.filter(p=>p.stage===stage.id);
+    const col=document.createElement('div');
+    col.className='k-col';
+    col.innerHTML=`
+      <div class="k-head" style="background:${stage.color}22;border-top:3px solid ${stage.color}">
+        <span class="k-head-name">${stage.name}</span>
+        <span class="k-count" style="background:${stage.color}44">${cards.length}</span>
+      </div>
+      <div class="k-cards" id="col-${stage.id}" data-stage="${stage.id}"></div>
+      <button class="k-add" onclick="openModal(null,'${stage.id}')">+ Agregar</button>`;
+    kb.appendChild(col);
+    const cardsEl=col.querySelector('.k-cards');
+    cards.forEach(p=>cardsEl.appendChild(makeCard(p)));
+    setupDrop(cardsEl);
+  });
+}
+
+function makeCard(p){
+  const el=document.createElement('div');
+  el.className='kcard'+(p.urgent?' kcard-urgent-border':'');
+  el.draggable=true;
+  el.dataset.id=p.id;
+  if(p.urgent)el.style.borderColor='#7f2d2d';
+  el.innerHTML=`
+    <div class="kcard-top">
+      <span class="kcard-flag">${p.flag||'🌐'}</span>
+      <span class="kcard-name">${esc(p.name)}</span>
+      ${p.urgent?'<span class="kcard-urgent">🔥</span>':''}
+    </div>
+    <div class="kcard-action">${esc(p.nextAction||'—')}</div>
+    <div class="kcard-foot">
+      <span class="kcard-resp">${p.responsible?esc(p.responsible):'—'}</span>
+      <button class="kcard-edit" onclick="openModal('${p.id}',null)">✏️ Editar</button>
+    </div>`;
+  el.addEventListener('dragstart',e=>{e.dataTransfer.setData('pid',p.id);el.classList.add('dragging');});
+  el.addEventListener('dragend',()=>el.classList.remove('dragging'));
+  return el;
+}
+
+function setupDrop(col){
+  col.addEventListener('dragover',e=>{e.preventDefault();col.classList.add('drag-over');});
+  col.addEventListener('dragleave',()=>col.classList.remove('drag-over'));
+  col.addEventListener('drop',async e=>{
+    e.preventDefault();
+    col.classList.remove('drag-over');
+    const pid=e.dataTransfer.getData('pid');
+    const newStage=col.dataset.stage;
+    const p=proyData.projects.find(x=>x.id===pid);
+    if(p&&p.stage!==newStage){
+      p.stage=newStage;
+      renderKanban();
+      await saveToGithub();
+    }
+  });
+}
+
+function setFilter(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderKanban();
+}
+
+// ── MODAL ──
+function openModal(id,stageId){
+  editingId=id; editingStage=stageId;
+  const m=document.getElementById('modalBg');
+  const sel=document.getElementById('fEtapa');
+  sel.innerHTML='';
+  if(proyData)proyData.stages.forEach(s=>{const o=document.createElement('option');o.value=s.id;o.textContent=s.name;sel.appendChild(o);});
+  if(id){
+    const p=proyData.projects.find(x=>x.id===id);
+    document.getElementById('modalTitle').textContent='Editar proyecto';
+    document.getElementById('fNombre').value=p.name;
+    document.getElementById('fRegion').value=p.region;
+    document.getElementById('fEtapa').value=p.stage;
+    document.getElementById('fAccion').value=p.nextAction||'';
+    document.getElementById('fResp').value=p.responsible||'';
+    document.getElementById('fNotas').value=p.notes||'';
+    document.getElementById('fUrgente').checked=!!p.urgent;
+    document.getElementById('btnEliminar').style.display='block';
+  }else{
+    document.getElementById('modalTitle').textContent='Nuevo proyecto';
+    ['fNombre','fAccion','fResp','fNotas'].forEach(x=>document.getElementById(x).value='');
+    document.getElementById('fRegion').value='argentina';
+    if(stageId)document.getElementById('fEtapa').value=stageId;
+    document.getElementById('fUrgente').checked=false;
+    document.getElementById('btnEliminar').style.display='none';
+  }
+  m.classList.add('open');
+}
+
+function closeModal(){document.getElementById('modalBg').classList.remove('open');}
+function closeModalBg(e){if(e.target===document.getElementById('modalBg'))closeModal();}
+
+async function saveProject(){
+  const nombre=document.getElementById('fNombre').value.trim();
+  if(!nombre){showToast('El nombre es obligatorio','err');return;}
+  if(!proyData)return;
+  if(editingId){
+    const p=proyData.projects.find(x=>x.id===editingId);
+    p.name=nombre; p.region=document.getElementById('fRegion').value;
+    p.stage=document.getElementById('fEtapa').value;
+    p.nextAction=document.getElementById('fAccion').value.trim();
+    p.responsible=document.getElementById('fResp').value.trim();
+    p.notes=document.getElementById('fNotas').value.trim();
+    p.urgent=document.getElementById('fUrgente').checked;
+  }else{
+    const id=nombre.toLowerCase().replace(/[^a-z0-9]/g,'_').substring(0,30)+'_'+Date.now();
+    proyData.projects.push({id,name:nombre,region:document.getElementById('fRegion').value,flag:document.getElementById('fRegion').value==='argentina'?'🇦🇷':'🌎',stage:document.getElementById('fEtapa').value,urgent:document.getElementById('fUrgente').checked,responsible:document.getElementById('fResp').value.trim(),nextAction:document.getElementById('fAccion').value.trim(),notes:document.getElementById('fNotas').value.trim()});
+  }
+  closeModal();
+  renderKanban();
+  await saveToGithub();
+}
+
+async function deleteProject(){
+  if(!editingId)return;
+  if(!confirm('¿Eliminar este proyecto?'))return;
+  proyData.projects=proyData.projects.filter(p=>p.id!==editingId);
+  closeModal();
+  renderKanban();
+  await saveToGithub();
+}
+
+// ── UTILS ──
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+let toastTmr=null;
+function showToast(msg,type){
+  const old=document.querySelector('.toast');if(old)old.remove();
+  if(toastTmr)clearTimeout(toastTmr);
+  const el=document.createElement('div');
+  el.className='toast '+(type||'');el.textContent=msg;
+  document.body.appendChild(el);
+  toastTmr=setTimeout(()=>el.remove(),3500);
+}
+
+// ── CALENDAR RENDER ──
+function renderCal(events){
+  const CAL_COLORS={'Ágora — Trabajo':'#5566ee','Ágora — Avisos':'#ff9944','Diego — Personal':'#44dd88','PAM — Automático':'#888899'};
+  const list=document.getElementById('calList');
+  if(!events||!events.length){list.innerHTML='<div style="text-align:center;padding:16px;color:#333;font-size:12px">Sin eventos para hoy 🎉</div>';return;}
+  list.innerHTML=events.map(ev=>{
+    const c=CAL_COLORS[ev.calendar]||'#5566ee';
+    const t=ev.start?ev.start.substring(11,16):'—';
+    return'<div class="cal-item"><div class="cal-t">'+t+'</div><div class="cal-dot" style="background:'+c+'"></div><div><div class="cal-name">'+esc(ev.title||ev.summary||'Sin título')+'</div><div class="cal-cat">'+esc(ev.calendar||'')+'</div></div></div>';
+  }).join('');
+}
+renderCal([{start:'2026-03-17T10:00:00',title:'Test sistema PAM',calendar:'Ágora — Trabajo'}]);
 </script>
 </body>
 </html>
